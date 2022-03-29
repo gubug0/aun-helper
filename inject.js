@@ -1,4 +1,4 @@
-(function() {
+﻿(function() {
 	const getLastBattleTime = function() {
 		var lastBattleTime = localStorage.getItem("lastBattle")
 		if (lastBattleTime) {
@@ -21,15 +21,11 @@
 		}
 	}
 
-
 	const submitBattle = function() {
 		const lastBattleTime = getLastBattleTime();
 		const currentTime = new Date()
-		console.log("submit. duration = " + (currentTime.getTime() - lastBattleTime.getTime()));
-		console.log("save to " + currentTime.getTime());
 		localStorage.setItem("lastBattle", currentTime.getTime());
 	}
-
 
 	var callCount = 0
 	const timerRun = function() {
@@ -40,13 +36,16 @@
 		var lastBattleTime = getLastBattleTime();
 		var currentTime = new Date();
 		
-		if (currentTime.getTime() - lastBattleTime.getTime() >= 10000) {
-			console.log(lastBattleTime.getTime(), document.querySelector("#reload b font").innerHTML, currentTime.getTime() - lastBattleTime.getTime(), document.hidden); 
+		if (currentTime.getTime() - lastBattleTime.getTime() >= 9500) {
+			console.log("화면에서는 " + document.querySelector("#reload b font").innerHTML + "초가 남았다고 하네요.");
+			console.log("" + ((currentTime.getTime() - lastBattleTime.getTime())/1000) + "초만에 사냥을 합니다.");
+			console.log("사냥을 시작합니다.");
 			submitBattle();
 			document.querySelector("form[action=bt]").submit()
 		} else {
-			if (callCount % 50 == 0) {
-				console.log(lastBattleTime.getTime(), document.querySelector("#reload b font").innerHTML, currentTime.getTime() - lastBattleTime.getTime(), document.hidden); 
+			if (callCount % 100 == 0) {
+				console.log("화면에서는 " + document.querySelector("#reload b font").innerHTML + "초가 남았다고 하네요.");
+				console.log("최근 사냥부터 " + ((currentTime.getTime() - lastBattleTime.getTime())/1000) + "초가 지났습니다.");
 			}
 		}
 		
@@ -79,7 +78,7 @@
 		  timerInterval = setInterval(() => {
 			time += 1;
 			self.postMessage({ time });
-		  }, 100);
+		  }, 50);
 		}
 	  };
 	};
