@@ -29,7 +29,7 @@
 
 	var callCount = 0
 	const timerRun = function() {
-		if (!document.querySelector("#reload b font")) {
+		if (!document.querySelector("#reload .hanna")) {
 			return;
 		}
 		
@@ -37,14 +37,14 @@
 		var currentTime = new Date();
 		
 		if (currentTime.getTime() - lastBattleTime.getTime() >= 9500) {
-			console.log("화면에서는 " + document.querySelector("#reload b font").innerHTML + "초가 남았다고 하네요.");
+			console.log("화면에서는 " + document.querySelector("#reload .hanna b").textContent + "초가 남았다고 하네요.");
 			console.log("" + ((currentTime.getTime() - lastBattleTime.getTime())/1000) + "초만에 사냥을 합니다.");
 			console.log("사냥을 시작합니다.");
 			submitBattle();
 			document.querySelector("form[action=bt]").submit()
 		} else {
 			if (callCount % 100 == 0) {
-				console.log("화면에서는 " + document.querySelector("#reload b font").innerHTML + "초가 남았다고 하네요.");
+				console.log("화면에서는 " + document.querySelector("#reload .hanna b").textContent + "초가 남았다고 하네요.");
 				console.log("최근 사냥부터 " + ((currentTime.getTime() - lastBattleTime.getTime())/1000) + "초가 지났습니다.");
 			}
 		}
