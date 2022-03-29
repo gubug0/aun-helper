@@ -6,5 +6,5 @@ function injectJs(srcFile) {
 }
 
 $(document).ready(function() {
-	injectJs(chrome.extension.getURL('inject.js'));
+	injectJs(chrome.runtime.getURL('inject.js'));
 });
