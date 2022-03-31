@@ -16,7 +16,7 @@
     "run_at": "document_end"
   }],
   "web_accessible_resources": [{
-	"resources": ["inject.js", "config.html", "config.js", "bootstrap.min.css", "bootstrap.min.js"],
+	"resources": ["head.js", "config.html", "config.js", "bootstrap.min.css", "bootstrap.min.js"],
 	"matches": ["https://aun.kr/*"]
   }]
 }

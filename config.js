@@ -1,10 +1,13 @@
 ﻿(function() {
+	function clearBattleCount(callback) {
+		chrome.storage.sync.set({"battleCount": 0}, callback);
+	}
 	function updateActiveButton() {
-		chrome.storage.sync.get(["isActive"], function(data) {
-			if (data.isActive === undefined || data.isActive) {
-				document.querySelector("#activateAuto").innerHTML = "자동사냥 활성";
+		chrome.storage.sync.get(["isAutoBattle"], function(data) {
+			if (!data.isAutoBattle) {
+				document.querySelector("#activateAuto").innerHTML = "자동사냥 시작";
 			} else {
-				document.querySelector("#activateAuto").innerHTML = "자동사냥 정지";
+				document.querySelector("#activateAuto").innerHTML = "자동사냥 종료";
 			}
 		});
 	}
@@ -20,14 +23,15 @@
 	}
 	
 	document.querySelector("#activateAuto").addEventListener("click", function() {
-		chrome.storage.sync.get(["isActive"], function(data) {
-			var isActivate = true
-			if (data.isActive === undefined || data.isActive) {
-				isActivate = false
-			}
-			chrome.storage.sync.set({"isActive": isActivate}, function() {
-				updateActiveButton();
+		
+		chrome.storage.sync.get(["isAutoBattle"], function(data) {
+			var isActivate = !data.isAutoBattle
+			clearBattleCount(function() {
+				chrome.storage.sync.set({"isAutoBattle": isActivate}, function() {
+					updateActiveButton();
+				});
 			});
+
 		});
 	});
 	

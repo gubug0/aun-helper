@@ -12,9 +12,10 @@ function getCurrentDateString() {
 	return pad(d.getMonth()+1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()) 
 }
 
-
-function clearBattleCount(callback) {
-	chrome.storage.sync.set({"battleCount": 0}, callback);
+function isAutoBattleActive(callback) {
+	chrome.storage.sync.get(["isAutoBattle"], function(data) {
+		callback(data.isAutoBattle);
+	});
 }
 function increaseBattleCount(callback) {
 	chrome.storage.sync.get(["battleCount"], function(data) {
@@ -23,29 +24,6 @@ function increaseBattleCount(callback) {
 			callback(result);
 		});
 	});
-}
-
-function setLastBattleTime(value, callback) {
-	chrome.storage.sync.set({"lastBattle": value}, function() {
-		callback(value);
-	});
-}
-
-function getLastBattleTime(callback) {
-	chrome.storage.sync.get(["lastBattle"], function(data) {
-		var lastBattleTime = data.lastBattle
-		if (lastBattleTime) {
-			lastBattleTime = new Date(parseFloat(lastBattleTime));
-			callback(lastBattleTime);
-		} else {
-			lastBattleTime = new Date();
-			setLastBattleTime(lastBattleTime.getTime(), callback);
-		}
-	});
-}
-
-function setBattleDuration(battleDuration, callback) {
-	chrome.storage.sync.set({"battleDuration": battleDuration}, callback);
 }
 
 function getBattleDuration(callback) {
@@ -76,75 +54,6 @@ function addLog(str) {
 	})
 }
 
-function submitBattle(callback) {
-	const currentTime = new Date()
-	setLastBattleTime(currentTime.getTime(), function() {
-		increaseBattleCount(callback);
-	});
-}
-
-function executeBattle() {
-	var callCount = 0
-	const timerRun = function() {
-		if (!document.querySelector("#reload .hanna")) {
-			return;
-		}
-		
-		getLastBattleTime(function(lastBattleTime) {
-			var currentTime = new Date();
-			getBattleDuration(function(battleDuration) {
-				if (currentTime.getTime() - lastBattleTime.getTime() >= battleDuration) {
-					console.log("화면에서는 " + document.querySelector("#reload .hanna b").textContent + "초가 남았다고 하네요.");
-					console.log("" + ((currentTime.getTime() - lastBattleTime.getTime())/1000) + "초만에 사냥을 합니다.");
-					console.log("사냥을 시작합니다.");
-					submitBattle(function(battleCount) {
-						addLog("" + battleCount + "번째 전투(delay=" + ((currentTime.getTime() - lastBattleTime.getTime())/1000) + "s)");
-						document.querySelector("form[action=bt]").submit();
-					});
-				} else {
-					if (callCount % 50 == 0) {
-						console.log("화면에서는 " + document.querySelector("#reload .hanna b").textContent + "초가 남았다고 하네요.");
-						console.log("최근 사냥부터 " + ((currentTime.getTime() - lastBattleTime.getTime())/1000) + "초가 지났습니다.");
-					}
-				}
-				callCount += 1;
-			});
-		});		
-	}
-
-	const formDom = document.querySelector("form[action=bt]");
-	if (formDom) {
-		formDom.removeAttribute("name")
-	}
-	
-	const workercode = () => {
-	  let timerInterval;
-	  let time = 0;
-	  self.onmessage = function ({ data: { turn } }) {
-		if (turn === "off" || timerInterval) {
-		  clearInterval(timerInterval);
-		  time = 0;
-		}
-		if (turn === "on") {
-		  timerInterval = setInterval(() => {
-			time += 1;
-			self.postMessage({ time });
-		  }, 50);
-		}
-	  };
-	};
-
-	let code = workercode.toString();
-	code = code.substring(code.indexOf("{") + 1, code.lastIndexOf("}"));
-
-	const blob = new Blob([code], { type: "application/javascript" });
-	const worker_script = new Worker(URL.createObjectURL(blob));
-
-	worker_script.onmessage = ({ data: { time } }) => {
-		timerRun();
-	};
-	worker_script.postMessage({ turn: "on" })
-}
 
 function injectConfigPage(srcFile) {
 	if (!document.querySelector("frame[name=topFrame]")) {
@@ -168,28 +77,177 @@ function injectConfigPage(srcFile) {
 	parentFrameset.insertBefore(frameset, parentFrameset.firstChild)
 }
 
-$(document).ready(function() {
-	var battleButton = findBattleButton();
-	if (battleButton) {
-		battleButton.addEventListener("submit", function() {
-			clearBattleCount(() => {
-				submitBattle(() => {
-					addLog("전투를 시작합니다.");
-				});
-			});
-		});
+function createWebWorker(workercode, action) {
+	let code = workercode.toString();
+	code = code.substring(code.indexOf("{") + 1, code.lastIndexOf("}"));
+
+	const blob = new Blob([code], { type: "application/javascript" });
+	const worker_script = new Worker(URL.createObjectURL(blob));
+
+	worker_script.onmessage = ({ data: { data } }) => {
+		action();
+	};
+	
+	return worker_script;
+}
+
+function create1000msTimeoutWorker(action) {
+	const workercode = () => {
+	  setTimeout(() => {
+		self.postMessage({ done: "done" });
+	  }, 1000);
+	};
+	return createWebWorker(workercode, action);
+}
+
+function create500msIntervalWorker(action) {
+	const workercode = () => {
+	  setInterval(() => {
+		self.postMessage({ done: "done" });
+	  }, 500);
+	};
+	
+	return createWebWorker(workercode, action);
+}
+
+function create50msIntervalWorker(action) {
+	const workercode = () => {
+	  setInterval(() => {
+		self.postMessage({ done: "done" });
+	  }, 50);
+	};
+	
+	return createWebWorker(workercode, action);
+}
+
+function create300msIntervalWorker(action) {
+	const workercode = () => {
+	  setInterval(() => {
+		self.postMessage({ done: "done" });
+	  }, 50);
+	};
+	
+	return createWebWorker(workercode, action);
+}
+
+function mainPageAction() {
+	if (window.location.pathname !== "/MainPage" && window.location.pathname !== "/top.cgi") {
+		return;
 	}
 	
-	chrome.storage.sync.get(["isActive"], function(data) {
-		if (data.isActive === undefined) {
-			chrome.storage.sync.set({"isActive":true}, function() {
-				executeBattle();
-			});
-		} else if (data.isActive) {
-			executeBattle();
+	isAutoBattleActive(function(isActive) {
+		if (!isActive) {
+			return;
 		}
+		
+		// 전투중 timeout 문제로 전투 실패발생
+		if (document.querySelector(".esd2") && document.querySelector(".esd2").textContent.includes("★ 축하합니다! ★")) {
+			addLog("전투 중 타이밍 문제가 발생했습니다. 전투를 재시작합니다.");
+			const worker = create1000msTimeoutWorker(function () {
+				worker.terminate();
+				document.querySelector("form[action='./top.cgi'").submit();
+			});
+		} else {
+			const battleButton = findBattleButton();
+			if (!battleButton) {
+				return;
+			}
+			
+			addLog("전투 버튼이 활성화 될때까지 대기합니다.");
+			const worker = create500msIntervalWorker(function () {
+				console.log("wait until battle button is activated");
+
+				if (!battleButton.querySelector("input[type=submit]")) {
+					return;
+				}
+				worker.terminate();
+				battleButton.submit();
+			});
+		}
+		
+		
+	})
+}
+
+function battlePageAction() {
+	if (window.location.pathname !== "/bt") {
+		return;
+	}
+	
+	isAutoBattleActive(function(isActive) {
+		if (!isActive) {
+			return;
+		}
+		
+		// 자동사냥 기능을 비활성화한다.
+		const formDom = findBattleButton();
+		if (formDom) {
+			formDom.removeAttribute("name")
+		} else {
+			return;
+		}
+		
+		var callCount = 0;
+		const pageLoadTime = new Date();
+		getBattleDuration(function(battleDuration) {
+			const worker = create50msIntervalWorker(function() {
+				if (!document.querySelector("#reload .hanna")) {
+					worker.terminate();
+					return;
+				}
+				const currentTime = new Date();
+				if (currentTime.getTime() - pageLoadTime.getTime() >= battleDuration) {
+					worker.terminate();
+					console.log("화면에서는 " + document.querySelector("#reload .hanna b").textContent + "초가 남았다고 하네요.");
+					console.log("" + ((currentTime.getTime() - pageLoadTime.getTime())/1000) + "초만에 사냥을 합니다.");
+					console.log("사냥을 시작합니다.");
+					increaseBattleCount(function(battleCount) {
+						addLog("" + battleCount + "번째 전투(delay=" + ((currentTime.getTime() - pageLoadTime.getTime())/1000) + "s)");
+						findBattleButton().submit();
+					});
+				} else {
+					if (callCount % 50 == 0) {
+						console.log("화면에서는 " + document.querySelector("#reload .hanna b").textContent + "초가 남았다고 하네요.");
+						console.log("최근 사냥부터 " + ((currentTime.getTime() - pageLoadTime.getTime())/1000) + "초가 지났습니다.");
+					}
+				}
+				callCount += 1;
+			});
+		});
+		
+		
+		
 	});
-				
+}
+$(document).ready(function() {
+	console.log("path : " + window.location.pathname);
+	mainPageAction();
+	battlePageAction();
 	injectConfigPage(chrome.runtime.getURL('config.html'));
+	
+	const mainPageForm = document.querySelector("form[action=MainPage]")
+	if (mainPageForm) {
+		isAutoBattleActive(function(lastBattleStatus) {
+			const worker = create300msIntervalWorker(function() {
+				isAutoBattleActive(function(currentBattleStatus) {
+					if (lastBattleStatus !== currentBattleStatus) {
+						worker.terminate();
+						if (currentBattleStatus) {
+							addLog("전투를 시작합니다.");
+						}
+						mainPageForm.submit();
+					}
+				});
+			});
+		})
+		
+	}
 });
 
+function injectHeadScript() {
+	_script = document.createElement('script');
+	_script.setAttribute('src', chrome.runtime.getURL('head.js'));
+	(document.head||document.documentElement).appendChild( _script  );
+	_script.parentNode.removeChild( _script);
+}
+injectHeadScript();
