@@ -13,11 +13,11 @@
 	}
 	
 	function updateBattleDuration() {
-		chrome.storage.sync.get(["battleDuration"], function(data) {
-			if (data.battleDuration === undefined) {
-				document.querySelector("#battleDuration").value = "9500";
+		chrome.storage.sync.get(["autoBattleDuration"], function(data) {
+			if (data.autoBattleDuration === undefined) {
+				document.querySelector("#battleDuration").value = "9000";
 			} else {
-				document.querySelector("#battleDuration").value = data.battleDuration;
+				document.querySelector("#battleDuration").value = data.autoBattleDuration;
 			}
 		});
 	}
@@ -38,7 +38,7 @@
 	document.querySelector("#changeDuration").addEventListener("click", function() {
 		const duration = document.querySelector("#battleDuration").value
 		//TODO 숫자 검증 범위 검증
-		chrome.storage.sync.set({"battleDuration": duration}, function() {
+		chrome.storage.sync.set({"autoBattleDuration": duration}, function() {
 			updateBattleDuration();
 		});
 	});

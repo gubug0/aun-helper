@@ -25,12 +25,15 @@ function increaseBattleCount(callback) {
 		});
 	});
 }
+function setBattleDuration(battleDuration, callback) {
+	chrome.storage.sync.set({"autoBattleDuration": battleDuration}, callback);
+}
 
 function getBattleDuration(callback) {
-	chrome.storage.sync.get(["battleDuration"], function(data) {
-		var battleDuration = data.battleDuration
+	chrome.storage.sync.get(["autoBattleDuration"], function(data) {
+		var battleDuration = data.autoBattleDuration
 		if (battleDuration === undefined) {
-			battleDuration = 9500;
+			battleDuration = 9000;
 			setBattleDuration(battleDuration, function() {
 				callback(battleDuration);
 			});
