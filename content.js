@@ -57,7 +57,6 @@ function addLog(str) {
 	})
 }
 
-
 function injectConfigPage(srcFile) {
 	if (!document.querySelector("frame[name=topFrame]")) {
 		return;
@@ -235,6 +234,7 @@ $(document).ready(function() {
 	console.log("path : " + window.location.pathname);
 	mainPageAction();
 	battlePageAction();
+	
 	injectConfigPage(chrome.runtime.getURL('config.html'));
 	
 	const mainPageForm = document.querySelector("form[action=MainPage]")
@@ -246,6 +246,8 @@ $(document).ready(function() {
 						worker.terminate();
 						if (currentBattleStatus) {
 							addLog("전투를 시작합니다.");
+						} else {
+							addLog("전투를 종료합니다.");
 						}
 						mainPageForm.submit();
 					}

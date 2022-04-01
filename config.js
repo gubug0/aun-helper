@@ -46,12 +46,14 @@
 	updateActiveButton();
 	updateBattleDuration();
 	
-	setInterval(function() {
+	function updateBattleLog() {
 		chrome.storage.sync.get(["battleLog"], function(data) {
 			const logDom = document.querySelector("#log")
 			logDom.innerHTML = data.battleLog
 			logDom.scrollTo(0, logDom.scrollHeight);
 		});
-	}, 1000);
+	};
+	updateBattleLog();
+	setInterval(updateBattleLog, 1000);
 	
 })();
