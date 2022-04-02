@@ -45,11 +45,11 @@ function getBattleDuration(callback) {
 
 function addLog(str) {
 	chrome.storage.sync.get(["battleLog"], function(data) {
-		const allLog = data.battleLog + "\n[" + getCurrentDateString() + "] " + str
+		const allLog = "[" + getCurrentDateString() + "] " + str + "\n" + data.battleLog
 		var splitLogs = allLog.split("\n");
 		
-		if (splitLogs.length > 100) {
-			splitLogs = splitLogs.slice(splitLogs.length - 100, splitLogs.length)
+		if (splitLogs.length > 5000) {
+			splitLogs = splitLogs.slice(0, 5000)
 		}
 		chrome.storage.sync.set({"battleLog": splitLogs.join("\n")}, function() {
 			
@@ -58,7 +58,7 @@ function addLog(str) {
 }
 
 function injectConfigPage(srcFile) {
-	if (!document.querySelector("frame[name=topFrame]")) {
+	if (!document.querySelector("frame[name=mainFrame]")) {
 		return;
 	}
 	const configFrame = document.createElement("frame");
@@ -67,16 +67,19 @@ function injectConfigPage(srcFile) {
 	configFrame.scrolling = "no"
 	
 	const frameset = document.createElement('frameset');
-	frameset.rows =  "*,300"
+	frameset.cols =  "*,260"
 
-	const topFrame = document.querySelector("frame[name=topFrame]")
+	const topFrame = document.querySelector("frame[name=mainFrame]")
 	const parentFrameset = topFrame.parentElement
 	topFrame.remove()
+	
 	frameset.appendChild(topFrame);
 	frameset.appendChild(configFrame);
+	
+	
 
 
-	parentFrameset.insertBefore(frameset, parentFrameset.firstChild)
+	parentFrameset.insertBefore(frameset, parentFrameset.lastChild)
 }
 
 function createWebWorker(workercode, action) {
@@ -144,7 +147,7 @@ function mainPageAction() {
 		
 		// 전투중 timeout 문제로 전투 실패발생
 		if (document.querySelector(".esd2") && document.querySelector(".esd2").textContent.includes("★ 축하합니다! ★")) {
-			addLog("전투 중 타이밍 문제가 발생했습니다. 전투를 재시작합니다.");
+			addLog("전투 중 오류발생! 전투를 재시작합니다.");
 			const worker = create1000msTimeoutWorker(function () {
 				worker.terminate();
 				document.querySelector("form[action='./top.cgi'").submit();
@@ -155,10 +158,8 @@ function mainPageAction() {
 				return;
 			}
 			
-			addLog("전투 버튼이 활성화 될때까지 대기합니다.");
+			addLog("전투 버튼 활성화까지 대기합니다.");
 			const worker = create500msIntervalWorker(function () {
-				console.log("wait until battle button is activated");
-
 				if (!battleButton.querySelector("input[type=submit]")) {
 					return;
 				}
@@ -209,18 +210,10 @@ function battlePageAction() {
 				const currentTime = new Date();
 				if (currentTime.getTime() - pageLoadTime.getTime() >= battleDuration) {
 					worker.terminate();
-					console.log("화면에서는 " + document.querySelector("#reload .hanna b").textContent + "초가 남았다고 하네요.");
-					console.log("" + ((currentTime.getTime() - pageLoadTime.getTime())/1000) + "초만에 사냥을 합니다.");
-					console.log("사냥을 시작합니다.");
 					increaseBattleCount(function(battleCount) {
 						addLog("" + battleCount + "번째 전투(delay=" + ((currentTime.getTime() - pageLoadTime.getTime())/1000) + "s)");
 						findBattleButton().submit();
 					});
-				} else {
-					if (callCount % 50 == 0) {
-						console.log("화면에서는 " + document.querySelector("#reload .hanna b").textContent + "초가 남았다고 하네요.");
-						console.log("최근 사냥부터 " + ((currentTime.getTime() - pageLoadTime.getTime())/1000) + "초가 지났습니다.");
-					}
 				}
 				callCount += 1;
 			});
@@ -231,7 +224,6 @@ function battlePageAction() {
 	});
 }
 $(document).ready(function() {
-	console.log("path : " + window.location.pathname);
 	mainPageAction();
 	battlePageAction();
 	

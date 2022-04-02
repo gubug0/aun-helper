@@ -4,10 +4,13 @@
 	}
 	function updateActiveButton() {
 		chrome.storage.sync.get(["isAutoBattle"], function(data) {
+			const activateAutoButton = document.querySelector("#activateAuto")
 			if (!data.isAutoBattle) {
-				document.querySelector("#activateAuto").innerHTML = "자동사냥 시작";
+				activateAutoButton.innerHTML = "자동사냥 시작";
+				activateAutoButton.classList.remove("error");
 			} else {
 				document.querySelector("#activateAuto").innerHTML = "자동사냥 종료";
+				activateAutoButton.classList.add("error");
 			}
 		});
 	}
@@ -20,6 +23,17 @@
 				document.querySelector("#battleDuration").value = data.autoBattleDuration;
 			}
 		});
+	}
+	
+	function updateBattleLog() {
+		chrome.storage.sync.get(["battleLog"], function(data) {
+			const logDom = document.querySelector("#log")
+			logDom.innerHTML = data.battleLog
+		});
+	};
+	
+	function clearBattleLog() {
+		chrome.storage.sync.set({"battleLog": ""}, updateBattleLog);
 	}
 	
 	document.querySelector("#activateAuto").addEventListener("click", function() {
@@ -43,16 +57,12 @@
 		});
 	});
 	
+	document.querySelector("#clearBattleLog").addEventListener("click", function() {
+		clearBattleLog();
+	});
+	
 	updateActiveButton();
 	updateBattleDuration();
-	
-	function updateBattleLog() {
-		chrome.storage.sync.get(["battleLog"], function(data) {
-			const logDom = document.querySelector("#log")
-			logDom.innerHTML = data.battleLog
-			logDom.scrollTo(0, logDom.scrollHeight);
-		});
-	};
 	updateBattleLog();
 	setInterval(updateBattleLog, 1000);
 	

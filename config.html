@@ -2,17 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <!--<link href="bootstrap.min.css" rel="stylesheet">-->
+	<link rel="stylesheet" href="config.css">
   </head>
-  <body>
-    
-	<div id="log" style="overflow:hidden; white-space:pre-wrap;height:230px;overflow:auto;">
-	</div>
-	<div style="height:50px">
-	<button id="activateAuto"></button><br />
-	사냥주기 : <input type="text" id="battleDuration" value="9500">ms <button id="changeDuration">수정</button>
+  <body style="margin:5px 0 0 0">
+    <div style="height:70px; margin: 0 0 0 5px">
+	<button id="activateAuto"></button><button id="clearBattleLog" class="warning" style="margin-left: 10px;">로그 삭제</button><br />
+	사냥주기 : <input type="text" id="battleDuration" value="9500" style="width:100px">ms <button id="changeDuration">수정</button>
 	<script src="config.js" type="text/javascript"></script>
-    <!--<script src="bootstrap.min.js"</script>-->
+	</div>
+	<div id="log" style="overflow:hidden; white-space:pre-wrap;height:calc(100% - 70px);overflow:auto;">
 	</div>
   </body>
 </html>
