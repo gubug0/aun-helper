@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "에타츠 타이머 throttler",
   "description": "에타츠 화면을 비활성화하여도 정상적으로 사냥할 수 있도록 하는 확장프로그램입니다.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "permissions": [
 	"storage"
   ],
