@@ -11,9 +11,6 @@
 
 ## 사용방법
 
-1. [여기](https://github.com/gubug0/aun-timer-throttler/releases)에서 최신 버전을 다운로드 받는다.
-2. 다운로드 받은 파일을 압축 해제 한다.
-3. [크롬 확장프로그램 관리](chrome://extensions/)에서 오른쪽 상단의 개발자 모드를 활성화 한다.
-4. "압축해제된 확장 프로그램을 로드합니다."를 클릭한다.
-5. 압축 해제한 폴더를 선택한다.
-6. 오른쪽 상단의 "자동전투 시작" 버튼을 누른다.
+1. [여기](https://chrome.google.com/webstore/detail/%EC%97%90%ED%83%80%EC%B8%A0-%ED%83%80%EC%9D%B4%EB%A8%B8-throttler/ppnelmgdamnbgcjfgplioaiejcpcfeol/related?hl=ko&authuser=0)에서 최신 버전을 다운로드 받는다.
+2. 에타츠 화면을 새로고침한다.
+3. 오른쪽 상단의 "자동전투 시작" 버튼을 누른다.
