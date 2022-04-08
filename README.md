@@ -11,7 +11,7 @@
 ### Stable Version
 * [에타츠 헬퍼](https://chrome.google.com/webstore/detail/%EC%97%90%ED%83%80%EC%B8%A0-%ED%83%80%EC%9D%B4%EB%A8%B8-throttler/ppnelmgdamnbgcjfgplioaiejcpcfeol/related?hl=ko&authuser=0)
 ### Unstable Version
-* https://github.com/gubug0/aun-timer-throttler/releases
+* [Release](https://github.com/gubug0/aun-helper/releases) 페이지에서 최신버전 설치
 
 ## 기능
 ### 자동사냥
