@@ -11,6 +11,9 @@ function getCurrentDateString() {
 	const d=new Date() 
 	return pad(d.getMonth()+1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()) 
 }
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
 
 function isAutoBattleActive(callback) {
 	chrome.storage.sync.get(["isAutoBattle"], function(data) {
@@ -223,9 +226,88 @@ function battlePageAction() {
 		
 	});
 }
+
+function stateUpAction() {
+	if (window.location.pathname !== "/town.cgi") {
+		return;
+	}
+	const stateUpMode = document.querySelector("form[action='./town.cgi'] input[name='mode'][value='hinn2']")
+	if (!stateUpMode) {
+		return;
+	}
+	
+	const stateUpForm = stateUpMode.parentElement;
+	const stateUpText = stateUpForm.querySelector("input[type='text'][name='abp']")
+	
+	const skillLevelTextArray = Array.from(document.querySelectorAll(".navbar.navbar-inverse.navbar-fixed-top div table tr td font")).map(item => item.textContent).filter(item => item.match(/숙련도: ([0-9,]+)/)).map(item => item.replace(/.*숙련도: ([0-9,]+) P.*/, "$1"))
+	if (skillLevelTextArray.length != 1) {		
+		return;
+	}
+	
+	const skillLevel = parseInt(skillLevelTextArray[0].replace(/,/g, ""), 10);
+	const stateUpCount = Math.floor(skillLevel / 12720)
+	const consumeSkillLevel = stateUpCount * 12000
+	
+	const tableTbody = stateUpForm.parentElement.parentElement.parentElement
+	
+	const trDom = document.createElement("tr")
+	const tdDom = document.createElement("td")
+	tdDom.colspan="2"
+	tdDom.align="right"
+	tdDom.bgColor="white"
+	tdDom.innerHTML = "현재 숙련도는 <b>" + numberWithCommas(skillLevel) + "</b> P 입니다. <br /> 최대치 상승비용까지 고려(12000 + 720)하여 <b>" + numberWithCommas(stateUpCount) + "</b> 만큼의 스탯을 올리는 것을 추천합니다. <br /> 소모되는 숙련도는 <b>" + numberWithCommas(consumeSkillLevel) + "</b> P 입니다. <br />반드시 연금술 LV5 로 어빌리티를 변경하셔야합니다. <br />"
+	const stateUpButton = document.createElement("input");
+	stateUpButton.value="숙련도 자동 사용";
+	stateUpButton.type="button";
+	stateUpButton.classList.add("btn");
+	stateUpButton.classList.add("btn-danger");
+	stateUpButton.classList.add("btn3d"); 
+	stateUpButton.addEventListener("click", function() {
+		stateUpText.value = consumeSkillLevel;
+		stateUpForm.submit()
+	});
+	
+	tdDom.appendChild(stateUpButton);
+	trDom.appendChild(tdDom);
+	tableTbody.appendChild(trDom);
+}
+function purcharseCentorAction() {
+	if (window.location.pathname !== "/town.cgi") {
+		return;
+	}
+	const purcharseMode = document.querySelector("form[action='./town.cgi'] input[name='mode'][value='purch_shop2']")
+	if (!purcharseMode) {
+		return;
+	}
+	const purchaseForm = purcharseMode.parentElement;
+	
+	const inputBox = purchaseForm.querySelector("input[type='text'][name='gaes']");
+	const rows = Array.from(purchaseForm.querySelectorAll("table tr td input[type=radio]")).map(item => item.parentElement.parentElement).filter(item => item.querySelectorAll("td")[3].bgColor === 'ffffcc')
+	rows.forEach(row => {
+		const itemCount = row.querySelector("td[bgcolor='ffffcc'] small").textContent.replace(/.*내보유량: (\d+)개.*/, "$1")
+		const radioButton = row.querySelector("td input[type=radio]");
+		
+		const divDom = document.createElement("div");
+		const sellAllButton = document.createElement("input");
+		sellAllButton.value="전체매각";
+		sellAllButton.type="button";
+		sellAllButton.classList.add("btn");
+		sellAllButton.classList.add("btn-danger");
+		sellAllButton.classList.add("btn-sm");  
+		sellAllButton.addEventListener("click", function() {
+			radioButton.checked=true
+			inputBox.value=itemCount
+			purchaseForm.submit()
+		});
+		divDom.appendChild(sellAllButton)
+		radioButton.parentElement.appendChild(divDom)
+	});
+}
 $(document).ready(function() {
 	mainPageAction();
 	battlePageAction();
+	purcharseCentorAction();
+	stateUpAction();
 	
 	injectConfigPage(chrome.runtime.getURL('config.html'));
 	
