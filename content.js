@@ -20,14 +20,23 @@ function isAutoBattleActive(callback) {
 		callback(data.isAutoBattle);
 	});
 }
-function increaseBattleCount(callback) {
+
+
+function getBattleCount(callback) {
 	chrome.storage.sync.get(["battleCount"], function(data) {
-		const result = data.battleCount + 1;
+		callback(data.battleCount);
+	});
+}
+
+function increaseBattleCount(callback) {
+	getBattleCount(function(battleCount) {
+		const result = battleCount + 1;
 		chrome.storage.sync.set({battleCount: result}, function() {
 			callback(result);
 		});
 	});
 }
+
 function setBattleDuration(battleDuration, callback) {
 	chrome.storage.sync.set({"autoBattleDuration": battleDuration}, callback);
 }
@@ -333,9 +342,13 @@ $(document).ready(function() {
 });
 
 function injectHeadScript() {
-	_script = document.createElement('script');
-	_script.setAttribute('src', chrome.runtime.getURL('head.js'));
-	(document.head||document.documentElement).appendChild( _script  );
-	_script.parentNode.removeChild( _script);
+	isAutoBattleActive(function (isAutoBattle) {
+		if (isAutoBattle) {
+			_script = document.createElement('script');
+			_script.setAttribute('src', chrome.runtime.getURL('head.js'));
+			(document.head||document.documentElement).appendChild( _script  );
+			_script.parentNode.removeChild( _script);
+		}
+	});
 }
 injectHeadScript();
