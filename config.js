@@ -16,11 +16,16 @@
 	}
 	
 	function updateBattleDuration() {
-		chrome.storage.sync.get(["autoBattleDuration"], function(data) {
+		chrome.storage.sync.get(["autoBattleDuration", "autoBattleFiveSecDuration"], function(data) {
 			if (data.autoBattleDuration === undefined) {
 				document.querySelector("#battleDuration").value = "9000";
 			} else {
 				document.querySelector("#battleDuration").value = data.autoBattleDuration;
+			}
+			if (data.autoBattleFiveSecDuration === undefined) {
+				document.querySelector("#battleFiveSecDuration").value = "4000";
+			} else {
+				document.querySelector("#battleFiveSecDuration").value = data.autoBattleFiveSecDuration;
 			}
 		});
 	}
@@ -51,8 +56,9 @@
 	
 	document.querySelector("#changeDuration").addEventListener("click", function() {
 		const duration = document.querySelector("#battleDuration").value
+		const fiveSecDuration = document.querySelector("#battleFiveSecDuration").value 
 		//TODO 숫자 검증 범위 검증
-		chrome.storage.sync.set({"autoBattleDuration": duration}, function() {
+		chrome.storage.sync.set({"autoBattleDuration": duration, "autoBattleFiveSecDuration": fiveSecDuration}, function() {
 			updateBattleDuration();
 		});
 	});

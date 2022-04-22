@@ -41,17 +41,36 @@ function setBattleDuration(battleDuration, callback) {
 	chrome.storage.sync.set({"autoBattleDuration": battleDuration}, callback);
 }
 
+function setBattleFiveSecDuration(battleDuration, callback) {
+	chrome.storage.sync.set({"autoBattleFiveSecDuration": battleDuration}, callback);
+}
+
 function getBattleDuration(callback) {
-	chrome.storage.sync.get(["autoBattleDuration"], function(data) {
-		var battleDuration = data.autoBattleDuration
-		if (battleDuration === undefined) {
-			battleDuration = 9000;
-			setBattleDuration(battleDuration, function() {
+	chrome.storage.sync.get(["autoBattleDuration", "autoBattleFiveSecDuration"], function(data) {
+		
+		if (is5SecondsBattleUser()) {
+			var battleDuration = data.autoBattleFiveSecDuration
+			if (battleDuration === undefined) {
+				battleDuration = 4000;
+				setBattleFiveSecDuration(battleDuration, function() {
+					callback(battleDuration);
+				});
+			} else {
 				callback(battleDuration);
-			});
+			}
 		} else {
-			callback(battleDuration);
+			var battleDuration = data.autoBattleDuration
+			if (battleDuration === undefined) {
+				battleDuration = 9000;
+				setBattleDuration(battleDuration, function() {
+					callback(battleDuration);
+				});
+			} else {
+				callback(battleDuration);
+			}
 		}
+		
+		
 	});
 }
 
@@ -67,6 +86,10 @@ function addLog(str) {
 			
 		})
 	})
+}
+
+function is5SecondsBattleUser() {
+	return Array.from(document.querySelectorAll(".offer.offer-radius.table font")).filter(item => item.textContent.match(/.*5초사냥 사용자, [0-9]+ 초 남음.*/)).length > 0
 }
 
 function injectConfigPage(srcFile) {
@@ -168,7 +191,7 @@ function mainPageAction() {
 		
 		// 전투중 timeout 문제로 전투 실패발생
 		if (document.querySelector(".esd2") && document.querySelector(".esd2").textContent.includes("★ 축하합니다! ★")) {
-			addLog("전투 중 오류발생! 전투를 재시작합니다.");
+			addLog("전투 중 오류발생!");
 			const worker = create1000msTimeoutWorker(function () {
 				worker.terminate();
 				document.querySelector("form[action='./top.cgi'").submit();
@@ -179,20 +202,19 @@ function mainPageAction() {
 				return;
 			}
 			
-			addLog("전투 버튼 활성화까지 대기합니다.");
+			addLog("전투 버튼 활성화 대기");
 			const worker = create500msIntervalWorker(function () {
 				if (!battleButton.querySelector("input[type=submit]")) {
 					return;
 				}
 				worker.terminate();
-				battleButton.submit();
+				increaseBattleCount(function(battleCount) {
+					addLog("[" + battleCount + "]전투");
+					battleButton.submit();
+				})
 			});
 		}
-		
-		
-	})
-	
-	
+	})	
 }
 
 function battlePageAction() {
@@ -234,7 +256,7 @@ function battlePageAction() {
 				if (currentTime.getTime() - pageLoadTime.getTime() >= battleDuration) {
 					worker.terminate();
 					increaseBattleCount(function(battleCount) {
-						addLog("" + battleCount + "번째 전투(delay=" + ((currentTime.getTime() - pageLoadTime.getTime())/1000) + "s)");
+						addLog("[" + battleCount + "]전투(" + ((currentTime.getTime() - pageLoadTime.getTime())/1000) + "s)");
 						findBattleButton().submit();
 					});
 				}
