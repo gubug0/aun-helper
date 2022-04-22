@@ -87,9 +87,6 @@ function injectConfigPage(srcFile) {
 	
 	frameset.appendChild(topFrame);
 	frameset.appendChild(configFrame);
-	
-	
-
 
 	parentFrameset.insertBefore(frameset, parentFrameset.lastChild)
 }
@@ -151,7 +148,7 @@ function addConfirmInnPage() {
 	const innForm = document.querySelector("form[action='./town.cgi?'] input[name='mode'][value='inn']");
 	if (innForm) {
 		innForm.parentElement.addEventListener("submit", function(event){
-			if(!confirm("여인숙으로 들어가실껀가요? 많은 골드가 소모될 수 있습니다.")) {
+			if(!confirm("여인숙으로 들어가실껀가요? 많은 골드가 소모될 수 있습니다.\n들어가지 않는다면 취소를 누르세요.")) {
 				event.preventDefault();
 			}
 		});
@@ -163,7 +160,7 @@ function mainPageAction() {
 		return;
 	}
 	addConfirmInnPage();
-	
+
 	isAutoBattleActive(function(isActive) {
 		if (!isActive) {
 			return;
@@ -279,19 +276,27 @@ function stateUpAction() {
 	const stateUpCount = Math.floor(skillLevel / (stateUpCost + allMaxUpCost))
 	const consumeSkillLevel = stateUpCount * stateUpCost
 	
-	const tableTbody = stateUpForm.parentElement.parentElement.parentElement
+	const maxUpBufferMax = Math.floor(skillLevel / allMaxUpCost)
+	const maxUpBufferStep = Math.floor(maxUpBufferMax / 10000) == 0 ? 1 : Math.floor(maxUpBufferMax / 10000)
 	
+	const tableTbody = stateUpForm.parentElement.parentElement.parentElement
 	const trDom = document.createElement("tr")
 	const tdDom = document.createElement("td")
+	
 	tdDom.colspan="2"
 	tdDom.align="right"
 	tdDom.bgColor="white"
-	tdDom.innerHTML = "현재 숙련도: <b>" + numberWithCommas(skillLevel) + "</b> P<br />"
-		+ "할인률 : <b>" + discountRatePercent + "%</b><br />"
-		+ "1업당 숙련도: <b>" + stateUpCost +" P</b><br />" 
-		+ "연글제작 비용(연금술LV5 기준): <b>" + maxUpCost + " * 6 = " + allMaxUpCost + "</b><br />"
-		+ "고급여관에서 소모할 총 숙련도: <b>" + numberWithCommas(consumeSkillLevel) + "</b><br />"
-		+ "올라가는 스탯: <b>" + numberWithCommas(stateUpCount) + "</b><br />"
+	tdDom.innerHTML = "현재 숙련도: <input type='text' size='14' id='skillLevel' value='" + numberWithCommas(skillLevel) + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
+		+ "할인률: <input type='text' size='14' id='discountRatePercent' value='" + discountRatePercent + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly>%<br />"
+		+ "1업당 숙련도: <input type='text' size='14' id='stateUpCost' value='" + numberWithCommas(stateUpCost) + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
+		+ "연글제작 비용(연금술LV5 기준): <input type='text' size='14' id='maxUpCost' value='" + maxUpCost + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
+		+ "올라가는 스탯: <input type='text' size='14' id='stateUpCount' value='" + numberWithCommas(stateUpCount) + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
+		+ "고급여관에서 소모할 총 숙련도: <input type='text' size='14' id='consumeSkillLevel' value='" + numberWithCommas(consumeSkillLevel) + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
+		+ "추가로 올릴 최대치(아래 바를 이동해서 결정하세요.): <input type='text' size='14' id='maxUpBufferText' value='0' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
+		+ "<input type='range' id='maxUpBuffer' min='0' max='" + maxUpBufferMax + "' step='" + maxUpBufferStep + "' value='0'>"
+		+ "<b style='font-size:large'>올려야할 최대치(숙련도 자동 사용 전에 복사하세요.)</b>: <input type='text' size='14' id='maxUpTotalCount' value='" + stateUpCount + "' style='text-align:right;background-color: #DDDDDD;border: 0px;    font-size: large;' readonly> P<br />";
+		
+		
 	const stateUpButton = document.createElement("input");
 	stateUpButton.value="숙련도 자동 사용";
 	stateUpButton.type="button";
@@ -299,13 +304,28 @@ function stateUpAction() {
 	stateUpButton.classList.add("btn-danger");
 	stateUpButton.classList.add("btn3d"); 
 	stateUpButton.addEventListener("click", function() {
-		stateUpText.value = consumeSkillLevel;
+		const value = document.querySelector("#consumeSkillLevel").value
+		stateUpText.value = value.replace(/,/g, "");
 		stateUpForm.submit()
 	});
 	
 	tdDom.appendChild(stateUpButton);
 	trDom.appendChild(tdDom);
 	tableTbody.appendChild(trDom);
+	
+	document.querySelector("#maxUpBuffer").addEventListener("input", function() {
+		const currentValue = parseInt(document.querySelector("#maxUpBuffer").value, 10)
+		document.querySelector("#maxUpBufferText").value = numberWithCommas(currentValue)
+		
+		const bufferedSkillLevel = skillLevel - (currentValue * allMaxUpCost)
+		const bufferedStateUpCount = Math.floor(bufferedSkillLevel / (stateUpCost + allMaxUpCost))
+		const bufferedConsumeSkillLevel = bufferedStateUpCount * stateUpCost
+		
+		document.querySelector("#stateUpCount").value = numberWithCommas(bufferedStateUpCount)
+		document.querySelector("#consumeSkillLevel").value = numberWithCommas(bufferedConsumeSkillLevel)
+		document.querySelector("#maxUpTotalCount").value = (currentValue + bufferedStateUpCount)
+	});
+	console.log(document.querySelector("#skillLevel"));
 }
 
 function purcharseCentorAction() {
