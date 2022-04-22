@@ -147,10 +147,22 @@ function create300msIntervalWorker(action) {
 	return createWebWorker(workercode, action);
 }
 
+function addConfirmInnPage() {
+	const innForm = document.querySelector("form[action='./town.cgi?'] input[name='mode'][value='inn']");
+	if (innForm) {
+		innForm.parentElement.addEventListener("submit", function(event){
+			if(!confirm("여인숙으로 들어가실껀가요? 많은 골드가 소모될 수 있습니다.")) {
+				event.preventDefault();
+			}
+		});
+	}
+}
+
 function mainPageAction() {
 	if (window.location.pathname !== "/MainPage" && window.location.pathname !== "/top.cgi") {
 		return;
 	}
+	addConfirmInnPage();
 	
 	isAutoBattleActive(function(isActive) {
 		if (!isActive) {
@@ -182,6 +194,8 @@ function mainPageAction() {
 		
 		
 	})
+	
+	
 }
 
 function battlePageAction() {
@@ -253,9 +267,17 @@ function stateUpAction() {
 		return;
 	}
 	
+	const discountText = document.querySelector(".col-md-10 .table td[bgcolor='f1f1f1'] font[color='red']");
+	const discountRatePercent = discountText ? parseInt(discountText.textContent.replace(/.*그림으로 인해 ([0-9]+)％의 할인을 제공합니다.*/, "$1"), 10) : 0;
+	const discountRate = (100 - discountRatePercent) / 100;
+	const stateUpCost = Math.floor(12000 * discountRate);
+	const maxUpCost = Math.floor(120 * discountRate);
+	const allMaxUpCost = maxUpCost * 6;
+	
 	const skillLevel = parseInt(skillLevelTextArray[0].replace(/,/g, ""), 10);
-	const stateUpCount = Math.floor(skillLevel / 12720)
-	const consumeSkillLevel = stateUpCount * 12000
+	
+	const stateUpCount = Math.floor(skillLevel / (stateUpCost + allMaxUpCost))
+	const consumeSkillLevel = stateUpCount * stateUpCost
 	
 	const tableTbody = stateUpForm.parentElement.parentElement.parentElement
 	
@@ -264,7 +286,12 @@ function stateUpAction() {
 	tdDom.colspan="2"
 	tdDom.align="right"
 	tdDom.bgColor="white"
-	tdDom.innerHTML = "현재 숙련도는 <b>" + numberWithCommas(skillLevel) + "</b> P 입니다. <br /> 최대치 상승비용까지 고려(12000 + 720)하여 <b>" + numberWithCommas(stateUpCount) + "</b> 만큼의 스탯을 올리는 것을 추천합니다. <br /> 소모되는 숙련도는 <b>" + numberWithCommas(consumeSkillLevel) + "</b> P 입니다. <br />반드시 연금술 LV5 로 어빌리티를 변경하셔야합니다. <br />"
+	tdDom.innerHTML = "현재 숙련도: <b>" + numberWithCommas(skillLevel) + "</b> P<br />"
+		+ "할인률 : <b>" + discountRatePercent + "%</b><br />"
+		+ "1업당 숙련도: <b>" + stateUpCost +" P</b><br />" 
+		+ "연글제작 비용(연금술LV5 기준): <b>" + maxUpCost + " * 6 = " + allMaxUpCost + "</b><br />"
+		+ "고급여관에서 소모할 총 숙련도: <b>" + numberWithCommas(consumeSkillLevel) + "</b><br />"
+		+ "올라가는 스탯: <b>" + numberWithCommas(stateUpCount) + "</b><br />"
 	const stateUpButton = document.createElement("input");
 	stateUpButton.value="숙련도 자동 사용";
 	stateUpButton.type="button";
@@ -280,6 +307,7 @@ function stateUpAction() {
 	trDom.appendChild(tdDom);
 	tableTbody.appendChild(trDom);
 }
+
 function purcharseCentorAction() {
 	if (window.location.pathname !== "/town.cgi") {
 		return;
