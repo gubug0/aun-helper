@@ -79,8 +79,8 @@ function addLog(str) {
 		const allLog = "[" + getCurrentDateString() + "] " + str + "\n" + data.battleLog
 		var splitLogs = allLog.split("\n");
 		
-		if (splitLogs.length > 80) {
-			splitLogs = splitLogs.slice(0, 80)
+		if (splitLogs.length > 50) {
+			splitLogs = splitLogs.slice(0, 50)
 		}
 		chrome.storage.sync.set({"battleLog": splitLogs.join("\n")}, function() {
 			
