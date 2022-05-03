@@ -15,6 +15,19 @@
 		});
 	}
 	
+	function updateAlarmSoundButton() {
+		chrome.storage.sync.get(["isAlarmSound"], function(data) {
+			const alarmSoundButton = document.querySelector("#alarmSound");
+			if (!data.isAlarmSound) {
+				alarmSoundButton.innerHTML = "알람소리O";
+				alarmSoundButton.classList.remove("error");
+			} else {
+				alarmSoundButton.innerHTML = "알람소리X";
+				alarmSoundButton.classList.add("error");
+			}
+		});
+	}
+	
 	function updateBattleDuration() {
 		chrome.storage.sync.get(["autoBattleDuration", "autoBattleFiveSecDuration"], function(data) {
 			if (data.autoBattleDuration === undefined) {
@@ -116,9 +129,13 @@
 			}
 			
 			if (new Date().getTime() - data.guildwarTime >= 1000 * 60 * 10) {
-				playSound();
-				chrome.storage.sync.set({"guildwarAlarm": false});
-				addLog("길드전 수행가능");
+				chrome.storage.sync.get(["isAlarmSound"], function(data) {
+					if (!data.isAlarmSound) {
+						playSound();
+					}
+					chrome.storage.sync.set({"guildwarAlarm": false});
+					addLog("길드전 수행가능");
+				});
 			}
 		});
 	});
@@ -149,9 +166,21 @@
 		clearBattleLog();
 	});
 	
+	document.querySelector("#alarmSound").addEventListener("click", function() {
+		chrome.storage.sync.get(["isAlarmSound"], function(data) {
+			const isAlarmSound = !data.isAlarmSound
+			
+			chrome.storage.sync.set({"isAlarmSound": isAlarmSound}, function() {
+				updateAlarmSoundButton();
+			});
+		});
+	});
+	
 	updateActiveButton();
+	updateAlarmSoundButton();
 	updateBattleDuration();
 	updateBattleLog();
+
 	setInterval(updateBattleLog, 1000);
 	setInterval(updateAutoBattleLog, 1000);
 	
