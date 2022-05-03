@@ -137,7 +137,7 @@
 			const currentTime = new Date().getTime()
 			if (currentTime - data.guildwarTime >= 1000 * 60 * 10) {
 				chrome.storage.sync.get(["isAlarmSound"], function(data) {
-					if (!data.isAlarmSound && currentTime - data.guildwarTime < 1000 * 60 * 30) {
+					if (!data.isAlarmSound) {
 						playSound();
 					}
 					chrome.storage.sync.set({"guildwarAlarm": false});
@@ -162,7 +162,7 @@
 				guildWarStatusText.classList.add("guild_success");
 				guildWarStatusText.classList.remove("guild_fail");
 			} else {
-				guildWarStatusText.innerHTML = "길드전 수행불가";
+				guildWarStatusText.innerHTML = "길드전 수행불가(" + Math.floor(600 - ((currentTime - data.guildwarTime)) / 1000) + "s)";
 				guildWarStatusText.classList.remove("guild_success");
 				guildWarStatusText.classList.add("guild_fail");
 			}
