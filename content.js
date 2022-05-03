@@ -79,13 +79,17 @@ function addLog(str) {
 		const allLog = "[" + getCurrentDateString() + "] " + str + "\n" + data.battleLog
 		var splitLogs = allLog.split("\n");
 		
-		if (splitLogs.length > 100) {
-			splitLogs = splitLogs.slice(0, 100)
+		if (splitLogs.length > 80) {
+			splitLogs = splitLogs.slice(0, 80)
 		}
 		chrome.storage.sync.set({"battleLog": splitLogs.join("\n")}, function() {
 			
 		})
 	})
+}
+
+function setAutoBattleLog(str) {
+	chrome.storage.sync.set({"autoBattleLog": "[" + getCurrentDateString() + "] " + str});
 }
 
 function is5SecondsBattleUser() {
@@ -191,7 +195,7 @@ function mainPageAction() {
 		
 		// 전투중 timeout 문제로 전투 실패발생
 		if (document.querySelector(".esd2") && document.querySelector(".esd2").textContent.includes("★ 축하합니다! ★")) {
-			addLog("전투 중 오류발생!");
+			addLog("오류발생!전장복귀!");
 			const worker = create1000msTimeoutWorker(function () {
 				worker.terminate();
 				document.querySelector("form[action='./top.cgi'").submit();
@@ -202,14 +206,13 @@ function mainPageAction() {
 				return;
 			}
 			
-			addLog("전투 버튼 활성화 대기");
 			const worker = create500msIntervalWorker(function () {
 				if (!battleButton.querySelector("input[type=submit]")) {
 					return;
 				}
 				worker.terminate();
 				increaseBattleCount(function(battleCount) {
-					addLog("[" + battleCount + "]전투");
+					setAutoBattleLog("[" + battleCount + "]전투");
 					battleButton.submit();
 				})
 			});
@@ -256,7 +259,7 @@ function battlePageAction() {
 				if (currentTime.getTime() - pageLoadTime.getTime() >= battleDuration) {
 					worker.terminate();
 					increaseBattleCount(function(battleCount) {
-						addLog("[" + battleCount + "]전투(" + ((currentTime.getTime() - pageLoadTime.getTime())/1000) + "s)");
+						setAutoBattleLog("[" + battleCount + "]전투");
 						findBattleButton().submit();
 					});
 				}

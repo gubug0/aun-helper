@@ -30,6 +30,13 @@
 		});
 	}
 	
+	function updateAutoBattleLog() {
+		chrome.storage.sync.get(["autoBattleLog"], function(data) {
+			const logDom = document.querySelector("#autoBattleLog")
+			logDom.innerHTML = data.autoBattleLog
+		});
+	}
+	
 	function updateBattleLog() {
 		chrome.storage.sync.get(["battleLog"], function(data) {
 			const logDom = document.querySelector("#log")
@@ -40,6 +47,81 @@
 	function clearBattleLog() {
 		chrome.storage.sync.set({"battleLog": ""}, updateBattleLog);
 	}
+	
+	function getCurrentDateString() { 
+		function pad(n) { return n<10 ? "0"+n : n } 
+		const d=new Date() 
+		return pad(d.getMonth()+1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()) 
+	}
+	
+	function addLog(str) {
+		chrome.storage.sync.get(["battleLog"], function(data) {
+			const allLog = "[" + getCurrentDateString() + "] " + str + "\n" + data.battleLog
+			var splitLogs = allLog.split("\n");
+			
+			if (splitLogs.length > 100) {
+				splitLogs = splitLogs.slice(0, 100)
+			}
+			chrome.storage.sync.set({"battleLog": splitLogs.join("\n")}, function() {
+				
+			})
+		})
+	}
+	
+	function getGuildWarTimeAndAlarm(callback) {
+		chrome.storage.sync.get(["guildwarTime", "guildwarAlarm"], callback);
+	}
+
+	function playSound() {
+		if (typeof(audio) != "undefined" && audio) {
+			audio.pause();
+			document.body.removeChild(audio);
+			audio = null;
+		}
+		audio = document.createElement('audio');
+		document.body.appendChild(audio);
+		audio.autoplay = true;
+		audio.src = 'alarm.wav';
+		audio.play();
+	}
+	
+	function createWebWorker(workercode, action) {
+		let code = workercode.toString();
+		code = code.substring(code.indexOf("{") + 1, code.lastIndexOf("}"));
+
+		const blob = new Blob([code], { type: "application/javascript" });
+		const worker_script = new Worker(URL.createObjectURL(blob));
+
+		worker_script.onmessage = ({ data: { data } }) => {
+			action();
+		};
+		
+		return worker_script;
+	}
+
+	function create1000msIntervalWorker(action) {
+		const workercode = () => {
+		  setInterval(() => {
+			self.postMessage({ done: "done" });
+		  }, 1000);
+		};
+		
+		return createWebWorker(workercode, action);
+	}
+	
+	create1000msIntervalWorker(function() {
+		getGuildWarTimeAndAlarm(function(data) {
+			if (!data.guildwarAlarm || !data.guildwarTime) {
+				return;
+			}
+			
+			if (new Date().getTime() - data.guildwarTime >= 1000 * 60 * 10) {
+				playSound();
+				chrome.storage.sync.set({"guildwarAlarm": false});
+				addLog("길드전 수행가능");
+			}
+		});
+	});
 	
 	document.querySelector("#activateAuto").addEventListener("click", function() {
 		
@@ -71,5 +153,6 @@
 	updateBattleDuration();
 	updateBattleLog();
 	setInterval(updateBattleLog, 1000);
+	setInterval(updateAutoBattleLog, 1000);
 	
 })();

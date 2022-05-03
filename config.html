@@ -4,14 +4,22 @@
     <meta charset="utf-8">
 	<link rel="stylesheet" href="config.css">
   </head>
-  <body style="margin:5px 0 0 0">
-    <div style="height:100px; margin: 0 0 0 5px">
-	<button id="activateAuto"></button><button id="clearBattleLog" class="warning" style="margin-left: 10px;">로그 삭제</button><br /><br />
-	사냥주기 : <input type="text" id="battleDuration" value="9000" style="width:70px">ms <br />
-	사냥주기(5초) : <input type="text" id="battleFiveSecDuration" value="3000" style="width:70px">ms <button id="changeDuration">수정</button>
+  <body style="margin:5px 0 0 0;height:calc(100%-5px)">
+	<div class="box">
+		<div class="row header">
+			<div style="margin: 0 0 0 5px">
+				<button id="activateAuto"></button><button id="clearBattleLog" class="warning" style="margin-left: 10px;">로그 삭제</button><br /><br />
+				사냥주기 : <input type="text" id="battleDuration" value="9000" style="width:70px">ms <br />
+				사냥주기(5초) : <input type="text" id="battleFiveSecDuration" value="3000" style="width:70px">ms <button id="changeDuration">수정</button>
+			</div>
+			<div id="autoBattleLog" style="white-space:pre-wrap;background-color: #cccccc;overflow:auto;text-align: center;line-height: 35px;"></div>
+		</div>
+		<div class="row content">
+			<div id="log" style="white-space:pre-wrap;"></div>
+			
+		</div>
+	</div>
+	
 	<script src="config.js" type="text/javascript"></script>
-	</div>
-	<div id="log" style="overflow:hidden; white-space:pre-wrap;height:calc(100% - 100px);overflow:auto;">
-	</div>
   </body>
 </html>
