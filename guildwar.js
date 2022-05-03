@@ -15,7 +15,6 @@ function monitorGuildWar() {
 	}
 	
 	setGuildWarTimeAndResetAlarm();
-	addLog("길드전 수행");
 }
 $(document).ready(function() {
 	monitorGuildWar();

@@ -85,3 +85,11 @@ body {
   flex: 1 1 auto;
   overflow:auto;
 }
+
+.guild_success {
+	background-color:#98c2ff
+}
+
+.guild_fail {
+	background-color:#ffb2b9
+}

@@ -127,18 +127,38 @@
 			if (!data.guildwarAlarm || !data.guildwarTime) {
 				return;
 			}
-			
-			if (new Date().getTime() - data.guildwarTime >= 1000 * 60 * 10) {
+			updateGuildWarStatus();
+			const currentTime = new Date().getTime()
+			if (currentTime - data.guildwarTime >= 1000 * 60 * 10) {
 				chrome.storage.sync.get(["isAlarmSound"], function(data) {
-					if (!data.isAlarmSound) {
+					if (!data.isAlarmSound && currentTime - data.guildwarTime < 1000 * 60 * 30) {
 						playSound();
 					}
 					chrome.storage.sync.set({"guildwarAlarm": false});
-					addLog("길드전 수행가능");
 				});
 			}
 		});
 	});
+	
+	function updateGuildWarStatus() {
+		getGuildWarTimeAndAlarm(function(data) {
+			const guildWarStatusText = document.querySelector("#guildWarStatus");
+			if (!data.guildwarTime) {
+				guildWarStatusText.innerHTML = "길드전 수행가능";
+			} 
+			
+			const currentTime = new Date().getTime()
+			if (currentTime - data.guildwarTime >= 1000 * 60 * 10) {
+				guildWarStatusText.innerHTML = "길드전 수행가능";
+				guildWarStatusText.classList.add("guild_success");
+				guildWarStatusText.classList.remove("guild_fail");
+			} else {
+				guildWarStatusText.innerHTML = "길드전 수행불가";
+				guildWarStatusText.classList.remove("guild_success");
+				guildWarStatusText.classList.add("guild_fail");
+			}
+		});
+	}
 	
 	document.querySelector("#activateAuto").addEventListener("click", function() {
 		
@@ -180,6 +200,7 @@
 	updateAlarmSoundButton();
 	updateBattleDuration();
 	updateBattleLog();
+	updateGuildWarStatus();
 
 	setInterval(updateBattleLog, 1000);
 	setInterval(updateAutoBattleLog, 1000);
