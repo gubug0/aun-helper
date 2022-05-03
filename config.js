@@ -1,6 +1,6 @@
 ﻿(function() {
 	function clearBattleCount(callback) {
-		chrome.storage.sync.set({"battleCount": 0}, callback);
+		chrome.storage.local.set({"battleCount": 0}, callback);
 	}
 	function updateActiveButton() {
 		chrome.storage.sync.get(["isAutoBattle"], function(data) {
@@ -44,21 +44,27 @@
 	}
 	
 	function updateAutoBattleLog() {
-		chrome.storage.sync.get(["autoBattleLog"], function(data) {
+		chrome.storage.local.get(["autoBattleLog"], function(data) {
+			if (data.autoBattleLog === undefined) {
+				data.autoBattleLog = ""
+			}
 			const logDom = document.querySelector("#autoBattleLog")
 			logDom.innerHTML = data.autoBattleLog
 		});
 	}
 	
 	function updateBattleLog() {
-		chrome.storage.sync.get(["battleLog"], function(data) {
+		chrome.storage.local.get(["battleLog"], function(data) {
+			if (data.battleLog === undefined) {
+				data.battleLog = ""
+			}
 			const logDom = document.querySelector("#log")
 			logDom.innerHTML = data.battleLog
 		});
 	};
 	
 	function clearBattleLog() {
-		chrome.storage.sync.set({"battleLog": ""}, updateBattleLog);
+		chrome.storage.local.set({"battleLog": ""}, updateBattleLog);
 	}
 	
 	function getCurrentDateString() { 
@@ -68,14 +74,14 @@
 	}
 	
 	function addLog(str) {
-		chrome.storage.sync.get(["battleLog"], function(data) {
+		chrome.storage.local.get(["battleLog"], function(data) {
 			const allLog = "[" + getCurrentDateString() + "] " + str + "\n" + data.battleLog
 			var splitLogs = allLog.split("\n");
 			
-			if (splitLogs.length > 100) {
-				splitLogs = splitLogs.slice(0, 100)
+			if (splitLogs.length > 200) {
+				splitLogs = splitLogs.slice(0, 200)
 			}
-			chrome.storage.sync.set({"battleLog": splitLogs.join("\n")}, function() {
+			chrome.storage.local.set({"battleLog": splitLogs.join("\n")}, function() {
 				
 			})
 		})
@@ -143,8 +149,11 @@
 	function updateGuildWarStatus() {
 		getGuildWarTimeAndAlarm(function(data) {
 			const guildWarStatusText = document.querySelector("#guildWarStatus");
-			if (!data.guildwarTime) {
+			if (data.guildwarTime === undefined) {
 				guildWarStatusText.innerHTML = "길드전 수행가능";
+				guildWarStatusText.classList.add("guild_success");
+				guildWarStatusText.classList.remove("guild_fail");
+				return;
 			} 
 			
 			const currentTime = new Date().getTime()

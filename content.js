@@ -24,6 +24,9 @@ function isAutoBattleActive(callback) {
 
 function getBattleCount(callback) {
 	chrome.storage.sync.get(["battleCount"], function(data) {
+		if (!data.battleCount) {
+			data.battleCount = 0;
+		}
 		callback(data.battleCount);
 	});
 }
@@ -69,27 +72,28 @@ function getBattleDuration(callback) {
 				callback(battleDuration);
 			}
 		}
-		
-		
 	});
 }
 
 function addLog(str) {
-	chrome.storage.sync.get(["battleLog"], function(data) {
+	chrome.storage.local.get(["battleLog"], function(data) {
+		if (data.battleLog === undefined) {
+			data.battleLog = "";
+		}
 		const allLog = "[" + getCurrentDateString() + "] " + str + "\n" + data.battleLog
 		var splitLogs = allLog.split("\n");
 		
-		if (splitLogs.length > 50) {
-			splitLogs = splitLogs.slice(0, 50)
+		if (splitLogs.length > 200) {
+			splitLogs = splitLogs.slice(0, 200)
 		}
-		chrome.storage.sync.set({"battleLog": splitLogs.join("\n")}, function() {
+		chrome.storage.local.set({"battleLog": splitLogs.join("\n")}, function() {
 			
 		})
 	})
 }
 
 function setAutoBattleLog(str) {
-	chrome.storage.sync.set({"autoBattleLog": "[" + getCurrentDateString() + "] " + str});
+	chrome.storage.local.set({"autoBattleLog": "[" + getCurrentDateString() + "] " + str});
 }
 
 function is5SecondsBattleUser() {
