@@ -91,17 +91,15 @@
 		chrome.storage.sync.get(["guildwarTime", "guildwarAlarm"], callback);
 	}
 
-	function playSound() {
-		if (typeof(audio) != "undefined" && audio) {
-			audio.pause();
-			document.body.removeChild(audio);
-			audio = null;
-		}
-		audio = document.createElement('audio');
-		document.body.appendChild(audio);
-		audio.autoplay = true;
-		audio.src = 'alarm.wav';
-		audio.play();
+	function sendNotification(isAlarmSound) {
+		chrome.notifications.create({
+			type: 'basic',
+			iconUrl: 'logo.png',
+			title: "에타츠 헬퍼",
+			message: '길드의 영토를 넓힐 때입니다.',
+			silent: !!isAlarmSound,
+			priority: 2
+		});
 	}
 	
 	function createWebWorker(workercode, action) {
@@ -137,9 +135,7 @@
 			const currentTime = new Date().getTime()
 			if (currentTime - data.guildwarTime >= 1000 * 60 * 10) {
 				chrome.storage.sync.get(["isAlarmSound"], function(data) {
-					if (!data.isAlarmSound) {
-						playSound();
-					}
+					sendNotification(data.isAlarmSound);
 					chrome.storage.sync.set({"guildwarAlarm": false});
 				});
 			}

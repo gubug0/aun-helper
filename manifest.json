@@ -4,7 +4,8 @@
   "description": "에타츠 플레이에 도움이 되는 기능을 제공하는 확장프로그램입니다.",
   "version": "0.2.2",
   "permissions": [
-	"storage"
+	"storage",
+	"notifications"
   ],
   "host_permissions": [
 	"https://aun.kr/"
@@ -19,15 +20,14 @@
 		"battlePage.js",
 		"purcharseCenter.js", 
 		"stateUpCenter.js", 
-		"header.js", 
-		
+		"header.js",
 		"guildwar.js"
 	],
     "matches": ["https://aun.kr/*"],
     "run_at": "document_end"
   }],
   "web_accessible_resources": [{
-	"resources": ["ignoreAlert.js", "config.html", "config.js", "config.css", "alarm.wav"],
+	"resources": ["ignoreAlert.js", "config.html", "config.js", "config.css", "logo.png"],
 	"matches": ["https://aun.kr/*"]
   }]
 }
