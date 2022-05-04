@@ -11,12 +11,23 @@
   ],
   "content_scripts": [ {
     "all_frames": true,
-    "js": ["jquery-3.6.0.min.js", "content.js", "guildwar.js"],
+    "js": [
+		"jquery-3.6.0.min.js", 
+		"lib.js", 
+		"content.js", 
+		"mainPage.js",
+		"battlePage.js",
+		"purcharseCenter.js", 
+		"stateUpCenter.js", 
+		"header.js", 
+		
+		"guildwar.js"
+	],
     "matches": ["https://aun.kr/*"],
     "run_at": "document_end"
   }],
   "web_accessible_resources": [{
-	"resources": ["head.js", "config.html", "config.js", "config.css", "alarm.wav"],
+	"resources": ["ignoreAlert.js", "config.html", "config.js", "config.css", "alarm.wav"],
 	"matches": ["https://aun.kr/*"]
   }]
 }
