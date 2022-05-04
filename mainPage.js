@@ -1,4 +1,17 @@
-
+function runMainToBattle() {
+	const battleButton = findBattleButton();
+	
+	const worker = create500msIntervalWorker(function () {
+		if (!battleButton.querySelector("input[type=submit]")) {
+			return;
+		}
+		worker.terminate();
+		increaseBattleCount(function(battleCount) {
+			setAutoBattleLog("[" + battleCount + "]전투");
+			battleButton.submit();
+		})
+	});
+}
 function mainPageAction() {
 	if (window.location.pathname !== "/MainPage" && window.location.pathname !== "/top.cgi") {
 		return;
@@ -23,16 +36,7 @@ function mainPageAction() {
 				return;
 			}
 			
-			const worker = create500msIntervalWorker(function () {
-				if (!battleButton.querySelector("input[type=submit]")) {
-					return;
-				}
-				worker.terminate();
-				increaseBattleCount(function(battleCount) {
-					setAutoBattleLog("[" + battleCount + "]전투");
-					battleButton.submit();
-				})
-			});
+			runMainToBattle();
 		}
 	})	
 }
