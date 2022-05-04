@@ -128,12 +128,12 @@
 	
 	create1000msIntervalWorker(function() {
 		getGuildWarTimeAndAlarm(function(data) {
-			if (!data.guildwarAlarm || !data.guildwarTime) {
+			if (data.guildwarAlarm === undefined || data.guildwarTime === undefined) {
 				return;
 			}
 			updateGuildWarStatus();
 			const currentTime = new Date().getTime()
-			if (currentTime - data.guildwarTime >= 1000 * 60 * 10) {
+			if (data.guildwarAlarm && currentTime - data.guildwarTime >= 1000 * 60 * 10) {
 				chrome.storage.sync.get(["isAlarmSound"], function(data) {
 					sendNotification(data.isAlarmSound);
 					chrome.storage.sync.set({"guildwarAlarm": false});
