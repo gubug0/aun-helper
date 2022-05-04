@@ -12,7 +12,7 @@ function mainPageAction() {
 		
 		// 전투중 timeout 문제로 전투 실패발생
 		if (document.querySelector(".esd2") && document.querySelector(".esd2").textContent.includes("★ 축하합니다! ★")) {
-			addLog("오류발생!전장복귀!");
+			addLog("전장복귀 대기");
 			const worker = create1000msTimeoutWorker(function () {
 				worker.terminate();
 				document.querySelector("form[action='./top.cgi'").submit();
