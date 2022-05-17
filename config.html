@@ -8,11 +8,36 @@
 	<div class="box">
 		<div class="row header">
 			<div style="margin: 0 0 5px 5px">
-				<button id="activateAuto"></button><button id="clearBattleLog" class="warning" style="margin-left: 10px;">로그 삭제</button><br /><br />
-				사냥주기 : <input type="text" id="battleDuration" value="9000" style="width:70px">ms <br />
-				사냥주기(5초) : <input type="text" id="battleFiveSecDuration" value="3000" style="width:70px">ms <button id="changeDuration">수정</button><br />
-				<button id="alarmSound"></button>
+				<button id="activateAuto"></button><button id="clearBattleLog" class="warning" style="margin-left: 10px;">로그 삭제</button>
 			</div>
+			<hr />
+			<div style="margin: 0 0 5px 5px">
+				<div class="config_title">사냥주기 설정</div>
+				<div class="config_row">
+					기본 : <input type="text" id="battleDuration" value="9000" style="width:70px">ms
+				</div>
+				<div class="config_row">
+					5초 사냥 : <input type="text" id="battleFiveSecDuration" value="3000" style="width:70px">ms <button id="changeDuration">수정</button>
+				</div>
+				<div class="config_row">
+					
+				</div>
+			</div>
+			<hr />
+			<div style="margin: 0 0 5px 5px">
+				<div class="config_title">길드전 알람 설정</div>
+				<div class="config_row">
+					<input type="text" id="guildWarAlarmLimit" value="300" style="width:50px">초 동안
+				</div>
+				<div class="config_row">
+					<input type="text" id="guildWarAlarmDuration" value="30" style="width:50px">초 주기로 알람 <button id="changeGuildWarAlarm">수정</button>
+				</div>
+				<div class="config_row">
+					<button id="changeActivationGuildWarAlarm"></button>
+					<button id="guildWarAlarmSound"></button>
+				</div>
+			</div>
+			<hr />
 			<div id="guildWarStatus" style="white-space:pre-wrap;overflow:auto;text-align: center;line-height: 35px;"></div>
 			<div id="autoBattleLog" style="white-space:pre-wrap;background-color: #cccccc;overflow:auto;text-align: center;line-height: 35px;"></div>
 		</div>

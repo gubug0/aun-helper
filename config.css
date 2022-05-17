@@ -93,3 +93,17 @@ body {
 .guild_fail {
 	background-color:#ffb2b9
 }
+.config_title {
+	font-size: 0.8rem;
+	font-weight: bold;
+	margin-bottom: 5px;
+	text-align: center;
+}
+
+.config_row {
+	margin-bottom: 5px;
+}
+
+.config_hide {
+	display: none;
+}

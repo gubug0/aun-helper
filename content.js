@@ -8,14 +8,14 @@ function findBattleButton() {
 }
 
 function isAutoBattleActive(callback) {
-	chrome.storage.sync.get(["isAutoBattle"], function(data) {
+	chrome.storage.local.get(["isAutoBattle"], function(data) {
 		callback(data.isAutoBattle);
 	});
 }
 
 
 function getBattleCount(callback) {
-	chrome.storage.sync.get(["battleCount"], function(data) {
+	chrome.storage.local.get(["battleCount"], function(data) {
 		if (!data.battleCount) {
 			data.battleCount = 0;
 		}
@@ -26,22 +26,22 @@ function getBattleCount(callback) {
 function increaseBattleCount(callback) {
 	getBattleCount(function(battleCount) {
 		const result = battleCount + 1;
-		chrome.storage.sync.set({battleCount: result}, function() {
+		chrome.storage.local.set({battleCount: result}, function() {
 			callback(result);
 		});
 	});
 }
 
 function setBattleDuration(battleDuration, callback) {
-	chrome.storage.sync.set({"autoBattleDuration": battleDuration}, callback);
+	chrome.storage.local.set({"autoBattleDuration": battleDuration}, callback);
 }
 
 function setBattleFiveSecDuration(battleDuration, callback) {
-	chrome.storage.sync.set({"autoBattleFiveSecDuration": battleDuration}, callback);
+	chrome.storage.local.set({"autoBattleFiveSecDuration": battleDuration}, callback);
 }
 
 function getBattleDuration(callback) {
-	chrome.storage.sync.get(["autoBattleDuration", "autoBattleFiveSecDuration"], function(data) {
+	chrome.storage.local.get(["autoBattleDuration", "autoBattleFiveSecDuration"], function(data) {
 		
 		if (is5SecondsBattleUser()) {
 			var battleDuration = data.autoBattleFiveSecDuration

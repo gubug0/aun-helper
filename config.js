@@ -2,8 +2,44 @@
 	function clearBattleCount(callback) {
 		chrome.storage.local.set({"battleCount": 0}, callback);
 	}
+	function getGuildWarAlarmConfig(callback) {
+		chrome.storage.local.get(["guildWarAlarmLimit", "guildWarAlarmDuration", "guildWarAlarmSound", "guildWarAlarmActivation", "guildWarNeedAlarm", "guildWarTime"], function(data) {
+			if (data.guildWarAlarmLimit === undefined) {
+				data.guildWarAlarmLimit = 300;
+			} 
+			if (data.guildWarAlarmDuration === undefined) {
+				data.guildWarAlarmDuration = 30;
+			}
+			if (data.guildWarAlarmSound === undefined) {
+				data.guildWarAlarmSound = false;
+			}
+			if (data.guildWarAlarmActivation === undefined) {
+				data.guildWarAlarmActivation = true;
+			}
+			if (data.guildWarNeedAlarm === undefined) {
+				data.guildWarNeedAlarm = false;
+			}
+			
+			if (callback) {
+				callback(data);
+			}
+		});
+	}
+	function setGuildWarAlarmDurationConfig(guildWarAlarmDuration, guildWarAlarmLimit, callback) {
+		chrome.storage.local.set({"guildWarAlarmDuration": guildWarAlarmDuration, "guildWarAlarmLimit": guildWarAlarmLimit}, callback);
+	}
+	function setGuildWarAlarmActivation(value, callback) {
+		chrome.storage.local.set({"guildWarAlarmActivation": value}, callback);
+	}
+	function setGuildWarNeedAlarm(value, callback) {
+		chrome.storage.local.set({"guildWarNeedAlarm": value}, callback);
+	}
+	function setGuildWarAlarmSound(value, callback) {
+		chrome.storage.local.set({"guildWarAlarmSound": value}, callback);
+	}
+	
 	function updateActiveButton() {
-		chrome.storage.sync.get(["isAutoBattle"], function(data) {
+		chrome.storage.local.get(["isAutoBattle"], function(data) {
 			const activateAutoButton = document.querySelector("#activateAuto")
 			if (!data.isAutoBattle) {
 				activateAutoButton.innerHTML = "자동사냥 시작";
@@ -16,20 +52,36 @@
 	}
 	
 	function updateAlarmSoundButton() {
-		chrome.storage.sync.get(["isAlarmSound"], function(data) {
-			const alarmSoundButton = document.querySelector("#alarmSound");
-			if (!data.isAlarmSound) {
+		getGuildWarAlarmConfig(function(data) {
+			const alarmSoundButton = document.querySelector("#guildWarAlarmSound");
+			if (!data.guildWarAlarmSound) {
 				alarmSoundButton.innerHTML = "알람소리O";
 				alarmSoundButton.classList.remove("error");
 			} else {
 				alarmSoundButton.innerHTML = "알람소리X";
 				alarmSoundButton.classList.add("error");
 			}
-		});
+		})
+	}
+	
+	function updateGuildWarAlarmActivationButton() {
+		getGuildWarAlarmConfig(function(data) {
+			const activationButton = document.querySelector("#changeActivationGuildWarAlarm");
+			const guildWarStatus = document.querySelector("#guildWarStatus");
+			if (data.guildWarAlarmActivation) {
+				activationButton.innerHTML = "길드전 알람 종료"
+				activationButton.classList.add("error");
+				guildWarStatus.classList.remove("config_hide");
+			} else {
+				activationButton.innerHTML = "길드전 알람 사용"
+				activationButton.classList.remove("error");
+				guildWarStatus.classList.add("config_hide");
+			}
+		})
 	}
 	
 	function updateBattleDuration() {
-		chrome.storage.sync.get(["autoBattleDuration", "autoBattleFiveSecDuration"], function(data) {
+		chrome.storage.local.get(["autoBattleDuration", "autoBattleFiveSecDuration"], function(data) {
 			if (data.autoBattleDuration === undefined) {
 				document.querySelector("#battleDuration").value = "9000";
 			} else {
@@ -87,10 +139,6 @@
 		})
 	}
 	
-	function getGuildWarTimeAndAlarm(callback) {
-		chrome.storage.sync.get(["guildwarTime", "guildwarAlarm"], callback);
-	}
-
 	function sendNotification(isAlarmSound) {
 		chrome.notifications.create({
 			type: 'basic',
@@ -127,50 +175,62 @@
 	}
 	
 	create1000msIntervalWorker(function() {
-		getGuildWarTimeAndAlarm(function(data) {
-			if (data.guildwarAlarm === undefined || data.guildwarTime === undefined) {
+		getGuildWarAlarmConfig(function(data) {
+			if (!data.guildWarTime || !data.guildWarAlarmActivation) {
 				return;
 			}
-			updateGuildWarStatus();
+			
+			updateGuildWarStatus(data);
 			const currentTime = new Date().getTime()
-			if (data.guildwarAlarm && currentTime - data.guildwarTime >= 1000 * 60 * 10) {
-				chrome.storage.sync.get(["isAlarmSound"], function(data) {
-					sendNotification(data.isAlarmSound);
-					chrome.storage.sync.set({"guildwarAlarm": false});
-				});
+			if (data.guildWarNeedAlarm && currentTime - data.guildWarTime >= 1000 * 60 * 10) {
+				sendNotification(data.guildWarAlarmSound);
+				setGuildWarNeedAlarm(false);
+			} else if (!data.guildWarNeedAlarm) {
+				const delayedTimeSecond = Math.floor((currentTime - data.guildWarTime) / 1000)
+				if (delayedTimeSecond <= data.guildWarAlarmLimit && delayedTimeSecond % data.guildWarAlarmDuration === 0) {
+					console.log("snooze");
+					sendNotification(data.guildWarAlarmSound);
+				}
 			}
 		});
 	});
 	
 	function updateGuildWarStatus() {
-		getGuildWarTimeAndAlarm(function(data) {
+		getGuildWarAlarmConfig(function(data) {
 			const guildWarStatusText = document.querySelector("#guildWarStatus");
-			if (data.guildwarTime === undefined) {
-				guildWarStatusText.innerHTML = "길드전 수행가능";
+			if (data.guildWarTime === undefined) {
+				guildWarStatusText.innerHTML = "알수없음";
 				guildWarStatusText.classList.add("guild_success");
 				guildWarStatusText.classList.remove("guild_fail");
 				return;
 			} 
 			
 			const currentTime = new Date().getTime()
-			if (currentTime - data.guildwarTime >= 1000 * 60 * 10) {
+			if (currentTime - data.guildWarTime >= 1000 * 60 * 10) {
 				guildWarStatusText.innerHTML = "길드전 수행가능";
 				guildWarStatusText.classList.add("guild_success");
 				guildWarStatusText.classList.remove("guild_fail");
 			} else {
-				guildWarStatusText.innerHTML = "길드전 수행불가(" + Math.floor(600 - ((currentTime - data.guildwarTime)) / 1000) + "s)";
+				guildWarStatusText.innerHTML = "길드전 수행불가(" + Math.floor(600 - ((currentTime - data.guildWarTime)) / 1000) + "s)";
 				guildWarStatusText.classList.remove("guild_success");
 				guildWarStatusText.classList.add("guild_fail");
 			}
 		});
 	}
 	
+	function updateGuildWarAlarmDurationConfig() {
+		getGuildWarAlarmConfig(function(data) {
+			document.querySelector("#guildWarAlarmDuration").value = data.guildWarAlarmDuration
+			document.querySelector("#guildWarAlarmLimit").value = data.guildWarAlarmLimit
+		});
+	}
+	
 	document.querySelector("#activateAuto").addEventListener("click", function() {
 		
-		chrome.storage.sync.get(["isAutoBattle"], function(data) {
+		chrome.storage.local.get(["isAutoBattle"], function(data) {
 			var isActivate = !data.isAutoBattle
 			clearBattleCount(function() {
-				chrome.storage.sync.set({"isAutoBattle": isActivate}, function() {
+				chrome.storage.local.set({"isAutoBattle": isActivate}, function() {
 					updateActiveButton();
 				});
 			});
@@ -182,32 +242,49 @@
 		const duration = document.querySelector("#battleDuration").value
 		const fiveSecDuration = document.querySelector("#battleFiveSecDuration").value 
 		//TODO 숫자 검증 범위 검증
-		chrome.storage.sync.set({"autoBattleDuration": duration, "autoBattleFiveSecDuration": fiveSecDuration}, function() {
+		chrome.storage.local.set({"autoBattleDuration": duration, "autoBattleFiveSecDuration": fiveSecDuration}, function() {
 			updateBattleDuration();
 		});
+	});
+	
+	document.querySelector("#changeGuildWarAlarm").addEventListener("click", function() {
+		const guildWarAlarmDuration = document.querySelector("#guildWarAlarmDuration").value 
+		const guildWarAlarmLimit = document.querySelector("#guildWarAlarmLimit").value
+		
+		setGuildWarAlarmDurationConfig(guildWarAlarmDuration, guildWarAlarmLimit);
 	});
 	
 	document.querySelector("#clearBattleLog").addEventListener("click", function() {
 		clearBattleLog();
 	});
 	
-	document.querySelector("#alarmSound").addEventListener("click", function() {
-		chrome.storage.sync.get(["isAlarmSound"], function(data) {
-			const isAlarmSound = !data.isAlarmSound
+	document.querySelector("#guildWarAlarmSound").addEventListener("click", function() {
+		getGuildWarAlarmConfig(function(data) {
+			const isAlarmSound = !data.guildWarAlarmSound
 			
-			chrome.storage.sync.set({"isAlarmSound": isAlarmSound}, function() {
+			setGuildWarAlarmSound(isAlarmSound, function() {
 				updateAlarmSoundButton();
 			});
 		});
 	});
 	
+	document.querySelector("#changeActivationGuildWarAlarm").addEventListener("click", function() {
+		getGuildWarAlarmConfig(function(data) {
+			const guildWarAlarmActivation = !data.guildWarAlarmActivation
+			setGuildWarAlarmActivation(guildWarAlarmActivation, function() {
+				updateGuildWarAlarmActivationButton();
+			})
+		});
+	});
+	
 	updateActiveButton();
 	updateAlarmSoundButton();
+	updateGuildWarAlarmActivationButton();
 	updateBattleDuration();
 	updateBattleLog();
 	updateGuildWarStatus();
+	updateGuildWarAlarmDurationConfig();
 
 	setInterval(updateBattleLog, 1000);
 	setInterval(updateAutoBattleLog, 1000);
-	
 })();

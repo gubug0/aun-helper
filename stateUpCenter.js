@@ -19,8 +19,7 @@ function stateUpAction() {
 	const discountRatePercent = discountText ? parseInt(discountText.textContent.replace(/.*그림으로 인해 ([0-9]+)％의 할인을 제공합니다.*/, "$1"), 10) : 0;
 	const discountRate = (100 - discountRatePercent) / 100;
 	const stateUpCost = Math.floor(12000 * discountRate);
-	const maxUpCost = Math.floor(120 * discountRate);
-	const allMaxUpCost = maxUpCost * 6;
+	const allMaxUpCost = Math.floor(120 * 6 * discountRate);
 	
 	const skillLevel = parseInt(skillLevelTextArray[0].replace(/,/g, ""), 10);
 	
@@ -40,7 +39,7 @@ function stateUpAction() {
 	tdDom.innerHTML = "현재 숙련도: <input type='text' size='14' id='skillLevel' value='" + numberWithCommas(skillLevel) + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
 		+ "할인률: <input type='text' size='14' id='discountRatePercent' value='" + discountRatePercent + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly>%<br />"
 		+ "1업당 숙련도: <input type='text' size='14' id='stateUpCost' value='" + numberWithCommas(stateUpCost) + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
-		+ "연금제작 비용(연금술LV5 기준): <input type='text' size='14' id='maxUpCost' value='" + maxUpCost + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
+		+ "연금제작 비용(연금술LV5 기준): <input type='text' size='14' id='allMaxUpCost' value='" + allMaxUpCost + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
 		+ "올라가는 스탯: <input type='text' size='14' id='stateUpCount' value='" + numberWithCommas(stateUpCount) + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
 		+ "고급여관에서 소모할 총 숙련도: <input type='text' size='14' id='consumeSkillLevel' value='" + numberWithCommas(consumeSkillLevel) + "' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
 		+ "추가로 올릴 최대치(아래 바를 이동해서 결정하세요.): <input type='text' size='14' id='maxUpBufferText' value='0' style='text-align:right;background-color: #DDDDDD;border: 0px;' readonly> P<br />"
