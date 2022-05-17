@@ -188,7 +188,6 @@
 			} else if (!data.guildWarNeedAlarm) {
 				const delayedTimeSecond = Math.floor((currentTime - data.guildWarTime) / 1000) - 600
 				if (delayedTimeSecond <= data.guildWarAlarmLimit && delayedTimeSecond % data.guildWarAlarmDuration === 0) {
-					console.log("snooze");
 					sendNotification(data.guildWarAlarmSound);
 				}
 			}
