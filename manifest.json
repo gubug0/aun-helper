@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "에타츠 헬퍼",
   "description": "에타츠 플레이에 도움이 되는 기능을 제공하는 확장프로그램입니다.",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "permissions": [
 	"storage",
 	"notifications"
