@@ -12,6 +12,17 @@ function runMainToBattle() {
 		})
 	});
 }
+function isBattleEndPage() {
+	const battleEndPageDom = document.querySelector(".esd2")
+	const purcharseCenterPageDom = document.querySelector("h1[id='shadow']")
+	if (battleEndPageDom && battleEndPageDom.textContent.includes("★ 축하합니다! ★")) {
+		return true;
+	} else if (purcharseCenterPageDom && purcharseCenterPageDom.textContent.match(/.*자동거래소 매입 확인서.*/)) {
+		return true;
+	}
+	
+	return false;
+}
 function mainPageAction() {
 	if (window.location.pathname !== "/MainPage" && window.location.pathname !== "/top.cgi") {
 		return;
@@ -24,7 +35,7 @@ function mainPageAction() {
 		}
 		
 		// 전투중 timeout 문제로 전투 실패발생
-		if (document.querySelector(".esd2") && document.querySelector(".esd2").textContent.includes("★ 축하합니다! ★")) {
+		if (isBattleEndPage()) {
 			addLog("전장복귀 대기");
 			const worker = create1000msTimeoutWorker(function () {
 				worker.terminate();
