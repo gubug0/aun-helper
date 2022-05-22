@@ -125,11 +125,6 @@ $(document).ready(function() {
 				isAutoBattleActive(function(currentBattleStatus) {
 					if (lastBattleStatus !== currentBattleStatus) {
 						worker.terminate();
-						if (currentBattleStatus) {
-							addLog("자동전투 시작");
-						} else {
-							addLog("자동전투 종료");
-						}
 						mainPageForm.submit();
 					}
 				});

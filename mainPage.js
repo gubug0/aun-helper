@@ -15,9 +15,12 @@ function runMainToBattle() {
 function isBattleEndPage() {
 	const battleEndPageDom = document.querySelector(".esd2")
 	const purcharseCenterPageDom = document.querySelector("h1[id='shadow']")
+	const newDayPageDom = document.querySelector("h1")
 	if (battleEndPageDom && battleEndPageDom.textContent.includes("★ 축하합니다! ★")) {
 		return true;
 	} else if (purcharseCenterPageDom && purcharseCenterPageDom.textContent.match(/.*자동거래소 매입 확인서.*/)) {
+		return true;
+	} else if (newDayPageDom && newDayPageDom.textContent.match(/.*날이 밝았습니다..*/)) {
 		return true;
 	}
 	

@@ -3,15 +3,15 @@
 		chrome.storage.local.set({"battleCount": 0}, callback);
 	}
 	function getGuildWarAlarmConfig(callback) {
-		chrome.storage.local.get(["guildWarAlarmLimit", "guildWarAlarmDuration", "guildWarAlarmSound", "guildWarAlarmActivation", "guildWarNeedAlarm", "guildWarTime"], function(data) {
+		chrome.storage.local.get(["guildWarAlarmLimit", "guildWarAlarmDuration", "alarmSound", "guildWarAlarmActivation", "guildWarNeedAlarm", "guildWarTime"], function(data) {
 			if (data.guildWarAlarmLimit === undefined) {
 				data.guildWarAlarmLimit = 300;
 			} 
 			if (data.guildWarAlarmDuration === undefined) {
 				data.guildWarAlarmDuration = 30;
 			}
-			if (data.guildWarAlarmSound === undefined) {
-				data.guildWarAlarmSound = false;
+			if (data.alarmSound === undefined) {
+				data.alarmSound = false;
 			}
 			if (data.guildWarAlarmActivation === undefined) {
 				data.guildWarAlarmActivation = true;
@@ -25,6 +25,23 @@
 			}
 		});
 	}
+	function getRefreshAlarmConfig(callback) {
+		chrome.storage.local.get(["alarmSound", "refreshAlarmActivation"], function(data) {
+			if (data.alarmSound === undefined) {
+				data.alarmSound = false;
+			}
+			if (data.refreshAlarmActivation === undefined) {
+				data.refreshAlarmActivation = true;
+			}
+			
+			if (callback) {
+				callback(data);
+			}
+		});
+	}
+	function setRefreshAlarmActivation(value, callback) {
+		chrome.storage.local.set({"refreshAlarmActivation": value}, callback);
+	}
 	function setGuildWarAlarmDurationConfig(guildWarAlarmDuration, guildWarAlarmLimit, callback) {
 		chrome.storage.local.set({"guildWarAlarmDuration": guildWarAlarmDuration, "guildWarAlarmLimit": guildWarAlarmLimit}, callback);
 	}
@@ -34,8 +51,11 @@
 	function setGuildWarNeedAlarm(value, callback) {
 		chrome.storage.local.set({"guildWarNeedAlarm": value}, callback);
 	}
-	function setGuildWarAlarmSound(value, callback) {
-		chrome.storage.local.set({"guildWarAlarmSound": value}, callback);
+	function setAlarmSound(value, callback) {
+		chrome.storage.local.set({"alarmSound": value}, callback);
+	}
+	function getRefreshedTimeStatus(callback) {
+		chrome.storage.local.get(["refreshedTime", "waterStatus"], callback);
 	}
 	
 	function updateActiveButton() {
@@ -53,8 +73,8 @@
 	
 	function updateAlarmSoundButton() {
 		getGuildWarAlarmConfig(function(data) {
-			const alarmSoundButton = document.querySelector("#guildWarAlarmSound");
-			if (!data.guildWarAlarmSound) {
+			const alarmSoundButton = document.querySelector("#alarmSound");
+			if (!data.alarmSound) {
 				alarmSoundButton.innerHTML = "알람소리O";
 				alarmSoundButton.classList.remove("error");
 			} else {
@@ -120,9 +140,15 @@
 	}
 	
 	function getCurrentDateString() { 
-		function pad(n) { return n<10 ? "0"+n : n } 
-		const d=new Date() 
-		return pad(d.getMonth()+1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()) 
+		function pad(n) { return n < 10 ? "0" + n : n } 
+		const d = new Date() 
+		return pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()) 
+	}
+	
+	function getDateString(time) { 
+		function pad(n) { return n < 10 ? "0" + n : n } 
+		const d = new Date(time)
+		return pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds()) 
 	}
 	
 	function addLog(str) {
@@ -183,12 +209,12 @@
 			updateGuildWarStatus(data);
 			const currentTime = new Date().getTime()
 			if (data.guildWarNeedAlarm && currentTime - data.guildWarTime >= 1000 * 60 * 10) {
-				sendNotification(data.guildWarAlarmSound);
+				sendNotification(data.alarmSound);
 				setGuildWarNeedAlarm(false);
 			} else if (!data.guildWarNeedAlarm) {
 				const delayedTimeSecond = Math.floor((currentTime - data.guildWarTime) / 1000) - 600
 				if (delayedTimeSecond <= data.guildWarAlarmLimit && delayedTimeSecond % data.guildWarAlarmDuration === 0) {
-					sendNotification(data.guildWarAlarmSound);
+					sendNotification(data.alarmSound);
 				}
 			}
 		});
@@ -224,6 +250,53 @@
 		});
 	}
 	
+	function updateRefreshedTime() {
+		getRefreshedTimeStatus(function(data) {
+			const refreshStatusDom = document.querySelector("#refreshStatus");
+			if (refreshStatusDom) {
+				const refreshedTime = data.refreshedTime
+				const waterStatus = data.waterStatus
+				
+				if (refreshedTime === undefined) {
+					refreshStatusDom.innerHTML = "상생 기록 없음";
+					refreshStatusDom.classList.add("refresh_success");
+					refreshStatusDom.classList.remove("refresh_fail");
+				} else {
+					var htmlText = `상생 ${getDateString(refreshedTime)}`;
+					if (waterStatus !== undefined) {
+						if (waterStatus) {
+							htmlText += " (수분부족)";
+							refreshStatusDom.classList.add("refresh_fail");
+							refreshStatusDom.classList.remove("refresh_success");
+						} else {
+							refreshStatusDom.classList.add("refresh_success");
+							refreshStatusDom.classList.remove("refresh_fail");
+						}
+					} else {
+						refreshStatusDom.classList.add("refresh_success");
+						refreshStatusDom.classList.remove("refresh_fail");
+					}
+					refreshStatusDom.innerHTML = htmlText;
+					
+				}
+			}
+		});
+	}
+	
+	function updateRefreshAlarmActivationButton() {
+		getRefreshAlarmConfig(function(data) {
+			const activationButton = document.querySelector("#changeActivationRefreshAlarm");
+			
+			if (data.refreshAlarmActivation) {
+				activationButton.innerHTML = "상생 알람 종료"
+				activationButton.classList.add("error");
+			} else {
+				activationButton.innerHTML = "상생 알람 사용"
+				activationButton.classList.remove("error");
+			}
+		})
+	}
+	
 	document.querySelector("#activateAuto").addEventListener("click", function() {
 		
 		chrome.storage.local.get(["isAutoBattle"], function(data) {
@@ -257,11 +330,11 @@
 		clearBattleLog();
 	});
 	
-	document.querySelector("#guildWarAlarmSound").addEventListener("click", function() {
+	document.querySelector("#alarmSound").addEventListener("click", function() {
 		getGuildWarAlarmConfig(function(data) {
-			const isAlarmSound = !data.guildWarAlarmSound
+			const isAlarmSound = !data.alarmSound
 			
-			setGuildWarAlarmSound(isAlarmSound, function() {
+			setAlarmSound(isAlarmSound, function() {
 				updateAlarmSoundButton();
 			});
 		});
@@ -276,6 +349,37 @@
 		});
 	});
 	
+	document.querySelector("#changeActivationRefreshAlarm").addEventListener("click", function() {
+		getRefreshAlarmConfig(function(data) {
+			const refreshAlarmActivation = !data.refreshAlarmActivation
+			setRefreshAlarmActivation(refreshAlarmActivation, function() {
+				updateRefreshAlarmActivationButton();
+			})
+		});
+	});
+	
+	chrome.runtime.onMessage.addListener(
+		function(request, sender, sendResponse) {
+			if (request.action === "refreshDetected") {
+				getRefreshAlarmConfig(function(data) {
+					const isAlarmSound = data.alarmSound;
+					if (data.refreshAlarmActivation) {
+						chrome.notifications.create({
+							type: 'basic',
+							iconUrl: 'logo.png',
+							title: "에타츠 헬퍼",
+							message: '채광과 낚시의 시간입니다.',
+							silent: !!isAlarmSound,
+							priority: 2
+						});
+					}
+				});
+				sendResponse({"response": "done"});
+			}
+		}
+	);
+	
+	updateAutoBattleLog();
 	updateActiveButton();
 	updateAlarmSoundButton();
 	updateGuildWarAlarmActivationButton();
@@ -283,7 +387,10 @@
 	updateBattleLog();
 	updateGuildWarStatus();
 	updateGuildWarAlarmDurationConfig();
+	updateRefreshedTime();
+	updateRefreshAlarmActivationButton();
 
-	setInterval(updateBattleLog, 1000);
+	setInterval(updateBattleLog, 3000);
 	setInterval(updateAutoBattleLog, 1000);
+	setInterval(updateRefreshedTime, 5000);
 })();

@@ -25,6 +25,13 @@
 			</div>
 			<hr />
 			<div style="margin: 0 0 5px 5px">
+				<div class="config_title">알람 소리 설정</div>
+				<div class="config_row">
+					<button id="alarmSound"></button>
+				</div>
+			</div>
+			<hr />
+			<div style="margin: 0 0 5px 5px">
 				<div class="config_title">길드전 알람 설정</div>
 				<div class="config_row">
 					<input type="text" id="guildWarAlarmLimit" value="300" style="width:50px">초 동안
@@ -34,16 +41,22 @@
 				</div>
 				<div class="config_row">
 					<button id="changeActivationGuildWarAlarm"></button>
-					<button id="guildWarAlarmSound"></button>
 				</div>
 			</div>
 			<hr />
-			<div id="guildWarStatus" style="white-space:pre-wrap;overflow:auto;text-align: center;line-height: 35px;"></div>
-			<div id="autoBattleLog" style="white-space:pre-wrap;background-color: #cccccc;overflow:auto;text-align: center;line-height: 35px;"></div>
+			<div style="margin: 0 0 5px 5px">
+				<div class="config_title">상생 알람 설정</div>
+				<div class="config_row">
+					<button id="changeActivationRefreshAlarm"></button>
+				</div>
+			</div>
+			<hr />
+			<div id="guildWarStatus" class="status_bar" style="border-bottom: black dashed 1px;"></div>
+			<div id="refreshStatus" class="status_bar" style="border-bottom: black dashed 1px;"></div>
+			<div id="autoBattleLog" class="status_bar auto_battle_log_bar"></div>
 		</div>
 		<div class="row content">
 			<div id="log" style="white-space:pre-wrap;"></div>
-			
 		</div>
 	</div>
 	
