@@ -107,3 +107,20 @@ body {
 .config_hide {
 	display: none;
 }
+
+#bossStatus {
+  background-color:#fecb00;
+  color:white;
+  text-align:center;
+}
+.bossParticipant {
+  width: 33%;
+  display:inline-block;
+  box-sizing:border-box;
+  border: 2px solid silver;
+  overflow: hidden;
+  white-space: nowrap;
+}
+#border-around {
+  border: 1px solid #000;
+}

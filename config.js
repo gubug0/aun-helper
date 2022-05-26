@@ -138,6 +138,15 @@
 			})
 		})
 	}
+
+	function updateBossStatus() {
+		chrome.storage.local.get(["bossTitle", "bossParticipant"], function(data) {
+			const bossTitle = document.querySelector("#bossTitle");
+			if (bossTitle) bossTitle.innerHTML = data.bossTitle;
+			const bossParticipant = document.querySelector("#bossStatus");
+			if (bossParticipant) bossParticipant.innerHTML = data.bossParticipant;
+		});
+	}
 	
 	function sendNotification(isAlarmSound) {
 		chrome.notifications.create({
@@ -286,4 +295,5 @@
 
 	setInterval(updateBattleLog, 1000);
 	setInterval(updateAutoBattleLog, 1000);
+	setInterval(updateBossStatus, 1000);
 })();
