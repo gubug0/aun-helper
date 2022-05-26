@@ -147,6 +147,23 @@
 			if (bossParticipant) bossParticipant.innerHTML = data.bossParticipant;
 		});
 	}
+
+	function updateRefreshedTime() {
+		chrome.storage.local.get(["refreshedTime"], function(data) {
+			const refreshedTime = document.querySelector("#refreshedTime");
+			if (refreshedTime) {
+				refreshedTime.innerHTML = data.refreshedTime;
+				if (data.refreshedTime === undefined) {
+					refreshedTime.innerHTML = "상생 기록 없음";
+					refreshedTime.classList.add("guild_fail");
+					refreshedTime.classList.remove("guild_success");
+				} else {
+					refreshedTime.classList.add("guild_success");
+					refreshedTime.classList.remove("guild_fail");
+				}
+			}
+		});
+	}
 	
 	function sendNotification(isAlarmSound) {
 		chrome.notifications.create({
@@ -296,4 +313,5 @@
 	setInterval(updateBattleLog, 1000);
 	setInterval(updateAutoBattleLog, 1000);
 	setInterval(updateBossStatus, 1000);
+	setInterval(updateRefreshedTime, 3000);
 })();
