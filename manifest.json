@@ -22,7 +22,8 @@
 		"stateUpCenter.js", 
 		"header.js",
 		"guildwar.js",
-		"logCollector.js"
+		"logCollector.js",
+		"fishing_mining.js"
 	],
     "matches": ["https://aun.kr/*"],
     "run_at": "document_end"
