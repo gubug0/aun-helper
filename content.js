@@ -67,7 +67,7 @@ function getBattleDuration(callback) {
 	});
 }
 
-function addLog(str) {
+function addLog(str, callback) {
 	chrome.storage.local.get(["battleLog"], function(data) {
 		if (data.battleLog === undefined) {
 			data.battleLog = "";
@@ -75,13 +75,30 @@ function addLog(str) {
 		const allLog = "[" + getCurrentDateString() + "] " + str + "\n" + data.battleLog
 		var splitLogs = allLog.split("\n");
 		
-		if (splitLogs.length > 200) {
-			splitLogs = splitLogs.slice(0, 200)
+		if (splitLogs.length > 2000) {
+            splitLogs = splitLogs.slice(0, 2000)
 		}
-		chrome.storage.local.set({"battleLog": splitLogs.join("\n")}, function() {
-			
-		})
+		chrome.storage.local.set({"battleLog": splitLogs.join("\n")}, callback)
 	})
+}
+
+function addMultiLog(strList, callback) {
+    chrome.storage.local.get(["battleLog"], function(data) {
+        if (data.battleLog === undefined) {
+            data.battleLog = "";
+        }
+        
+        var allLog = data.battleLog;
+        strList.forEach(str => {
+            allLog = "[" + getCurrentDateString() + "] " + str + "\n" + allLog
+        });
+        
+        var splitLogs = allLog.split("\n");
+        if (splitLogs.length > 2000) {
+            splitLogs = splitLogs.slice(0, 2000)
+        }
+        chrome.storage.local.set({"battleLog": splitLogs.join("\n")}, callback)
+    })
 }
 
 function setAutoBattleLog(str) {

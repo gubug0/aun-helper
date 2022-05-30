@@ -156,8 +156,8 @@
 			const allLog = "[" + getCurrentDateString() + "] " + str + "\n" + data.battleLog
 			var splitLogs = allLog.split("\n");
 			
-			if (splitLogs.length > 200) {
-				splitLogs = splitLogs.slice(0, 200)
+			if (splitLogs.length > 2000) {
+				splitLogs = splitLogs.slice(0, 2000)
 			}
 			chrome.storage.local.set({"battleLog": splitLogs.join("\n")}, function() {
 				

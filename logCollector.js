@@ -70,13 +70,16 @@ function parseLogMessage(log) {
         if (currentLog.filter(item => item.type === '민생지원').length > 0) {
 			processNewRefresh();
         }
+		
+		const logItems = []
+
 		if (currentLog.filter(item => item.type.match(/^[0-9]+등급$/)).length > 0) {
 			currentLog
 			.filter(item => item.type.match(/^[0-9]+등급$/))
 			.forEach(item => {
 				const city = item.message.replace(/(.*)州에 [0-9,]+골드의 가치를 가진 흑화된 (.*)\(이\)가 출현.*/, "$1");
 				const name = item.message.replace(/(.*)州에 [0-9,]+골드의 가치를 가진 흑화된 (.*)\(이\)가 출현.*/, "$2");
-				addLog(`[닼몹] ${city}州 ${item.type} ${name} 출현`);
+				logItems.push(`[닼몹] ${city}州 ${item.type} ${name} 출현`);
 			});
 		}
 		if (currentLog.filter(item => item.type.match(/^[0-9]+등급보상$/)).length > 0) {
@@ -84,9 +87,12 @@ function parseLogMessage(log) {
 			.filter(item => item.type.match(/^[0-9]+등급보상$/))
 			.forEach(item => {
 				const name = item.message.replace(/누군가 흑화된 (.*) 몬스터를 때려잡은 후 .*/, "$1");
-				addLog(`[닼몹] ${name} 사망`);
+                logItems.push(`[닼몹] ${name} 사망`);
 			});
 		}
+		if (logItems.length > 0) {
+            addMultiLog(logItems);
+        }
 	});
 }
 
