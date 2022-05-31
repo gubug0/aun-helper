@@ -69,6 +69,7 @@ function mainPageAction() {
 		return;
 	}
 	addConfirmInnPage();
+	makeUserListToggleable();
 
 	isAutoBattleActive(function(isActive) {
 		if (!isActive) {
@@ -107,6 +108,31 @@ function addConfirmInnPage() {
 	}
 }
 
+function makeUserListToggleable() {
+	var connectorRow = null;
+	var connectorDiv = null;
+	const holderRows = document.querySelectorAll("div[class='row']");
+	if (!holderRows) return;
+	for (var index = 0; index < holderRows.length; index ++) {
+		var holderRow = holderRows[index];
+		const holderConnectorDiv = holderRow.querySelector("div[class='col-md-12']");
+		if (!holderConnectorDiv || !holderConnectorDiv.textContent) continue;
+		if (!holderConnectorDiv.textContent.startsWith("접속중")) continue;
+		connectorRow = holderRow;
+		connectorDiv = holderConnectorDiv;
+		break;
+	}
+	if (!connectorRow || !connectorDiv) return;
+	connectorRow.removeChild(connectorDiv);
+	var detailDiv = document.createElement("details");
+	var summary = document.createElement("summary");
+	summary.innerText = "접속인원을 보시려면 누르세요!";
+	summary.style.fontSize = "larger";
+	summary.style.marginLeft = "15px";
+	detailDiv.append(summary);
+	detailDiv.append(connectorDiv);
+	connectorRow.prepend(detailDiv);
+}
 
 $(document).ready(function() {
 	mainPageAction();
