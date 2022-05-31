@@ -13,6 +13,64 @@ function isAutoBattleActive(callback) {
 	});
 }
 
+function getGuildCityData(callback) {
+	chrome.storage.local.get(["guildMap", "lastCity", "guildData", "cityData"], function(data) {
+		if (data.guildMap === undefined) {
+			data.guildMap = false;
+		}
+		if (data.lastCity === undefined) {
+			data.lastCity = "";
+		}
+		if (data.guildData === undefined) {
+			data.guildData = "";
+		}
+		if (data.cityData === undefined) {
+			data.cityData = "";
+		}
+
+		if (callback) {
+			callback(data);
+		}
+	});
+}
+
+function getCityData(cityDataArray, cityName) {
+	if (cityDataArray == null) return null;
+	try {
+		for (var index = 0; index < cityDataArray.length; index ++) {
+			var cityDataItem = cityDataArray[index];
+			if (cityDataItem == null || cityDataItem.title == null) continue;
+			if (cityDataItem.title != null && cityDataItem.title.trim() === cityName.trim()) {
+				return cityDataItem;
+			}
+		}
+	} catch (e) {
+		console.log(e);
+		return null;
+	}
+	return null;
+}
+
+function getGuildData(guildDataArray, guildName) {
+	if (guildDataArray == null) return null;
+	try {
+		for (var index = 0; index < guildDataArray.length; index ++) {
+			var guildDataItem = guildDataArray[index];
+			if (guildDataItem == null || guildDataItem.title == null) continue;
+			if (guildDataItem.title != null && guildDataItem.title.replace("길드","").trim() === guildName.replace("길드","").trim()) {
+				return guildDataItem;
+			}
+		}
+	} catch (e) {
+		console.log(e);
+		return null;
+	}
+	return null;
+}
+
+function setLastCity(value, callback) {
+	chrome.storage.local.set({"lastCity": value}, callback);
+}
 
 function getBattleCount(callback) {
 	chrome.storage.local.get(["battleCount"], function(data) {
