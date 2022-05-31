@@ -111,11 +111,11 @@ function addConfirmInnPage() {
 function makeUserListToggleable() {
 	var connectorRow = null;
 	var connectorDiv = null;
-	const holderRows = document.querySelectorAll("div[class='row']");
+	const holderRows = document.querySelectorAll("div.row");
 	if (!holderRows) return;
 	for (var index = 0; index < holderRows.length; index ++) {
 		var holderRow = holderRows[index];
-		const holderConnectorDiv = holderRow.querySelector("div[class='col-md-12']");
+		const holderConnectorDiv = holderRow.querySelector("div.col-md-12");
 		if (!holderConnectorDiv || !holderConnectorDiv.textContent) continue;
 		if (!holderConnectorDiv.textContent.startsWith("접속중")) continue;
 		connectorRow = holderRow;
@@ -123,12 +123,24 @@ function makeUserListToggleable() {
 		break;
 	}
 	if (!connectorRow || !connectorDiv) return;
+	var connectorCount = 0;
+	try {
+		connectorCount = (connectorDiv.textContent.match(/,/g) || []).length;
+	} catch (e) {
+		console.log(e);
+	}
 	connectorRow.removeChild(connectorDiv);
 	var detailDiv = document.createElement("details");
 	var summary = document.createElement("summary");
-	summary.innerText = "접속인원을 보시려면 누르세요!";
-	summary.style.fontSize = "larger";
+	var summaryBold = document.createElement("b");
+	var summaryTextObject = document.createElement("font")
+	summaryTextObject.innerText = `접속인원을 보시려면 누르세요! (총 ${connectorCount}명)`;
+	summaryTextObject.style.fontSize = "larger";
 	summary.style.marginLeft = "15px";
+	summary.style.marginTop = "5px";
+	summary.style.marginBottom = "5px";
+	summaryBold.append(summaryTextObject);
+	summary.append(summaryBold);
 	detailDiv.append(summary);
 	detailDiv.append(connectorDiv);
 	connectorRow.prepend(detailDiv);
