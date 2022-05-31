@@ -134,11 +134,14 @@ function makeUserListToggleable() {
 	var summary = document.createElement("summary");
 	var summaryBold = document.createElement("b");
 	var summaryTextObject = document.createElement("font")
-	summaryTextObject.innerText = `접속인원을 보시려면 누르세요! (총 ${connectorCount}명)`;
+	summaryTextObject.innerText = `▼ 접속인원을 보시려면 누르세요! (총 ${connectorCount}명) ▼`;
 	summaryTextObject.style.fontSize = "larger";
 	summary.style.marginLeft = "15px";
-	summary.style.marginTop = "5px";
-	summary.style.marginBottom = "5px";
+	summary.style.marginRight = "15px";
+	summary.style.lineHeight = "40px";
+	summary.style.textAlign = "center";
+	summary.style.backgroundColor = "#fcf8e3";
+	summary.style.cursor = "pointer";
 	summaryBold.append(summaryTextObject);
 	summary.append(summaryBold);
 	detailDiv.append(summary);
