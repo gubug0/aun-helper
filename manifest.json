@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "에타츠 헬퍼",
   "description": "에타츠 플레이에 도움이 되는 기능을 제공하는 확장프로그램입니다.",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "permissions": [
 	"storage",
 	"notifications"
@@ -21,13 +21,15 @@
 		"purcharseCenter.js", 
 		"stateUpCenter.js", 
 		"header.js",
-		"guildwar.js"
+		"guildwar.js",
+		"logCollector.js",
+		"fishing_mining.js"
 	],
     "matches": ["https://aun.kr/*"],
     "run_at": "document_end"
   }],
   "web_accessible_resources": [{
-	"resources": ["ignoreAlert.js", "config.html", "config.js", "config.css", "logo.png"],
+	"resources": ["ignoreAlert.js", "injectLogScript.js", "config.html", "config.js", "config.css", "logo.png"],
 	"matches": ["https://aun.kr/*"]
   }]
 }

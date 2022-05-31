@@ -107,3 +107,22 @@ body {
 .config_hide {
 	display: none;
 }
+
+.status_bar {
+	white-space:pre-wrap;
+	overflow:auto;
+	text-align: center;
+	line-height: 35px;
+}
+
+.auto_battle_log_bar {
+	background-color: #cccccc;
+}
+
+.refresh_success {
+	background-color:#98c2ff
+}
+
+.refresh_fail {
+	background-color:#ffb2b9
+}
