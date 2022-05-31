@@ -67,6 +67,18 @@ function getBattleDuration(callback) {
 	});
 }
 
+function getInventorySortConfig(callback) {
+	chrome.storage.local.get(["inventorySort"], function(data) {
+		if (data.inventorySort === undefined) {
+			data.inventorySort = true;
+		}
+
+		if (callback) {
+			callback(data);
+		}
+	});
+}
+
 function addLog(str, callback) {
 	chrome.storage.local.get(["battleLog"], function(data) {
 		if (data.battleLog === undefined) {
