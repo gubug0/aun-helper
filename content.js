@@ -68,15 +68,22 @@ function getBattleDuration(callback) {
 }
 
 function getInventorySortConfig(callback) {
-	chrome.storage.local.get(["inventorySort"], function(data) {
+	chrome.storage.local.get(["inventorySort", "inventoryFavorite"], function(data) {
 		if (data.inventorySort === undefined) {
 			data.inventorySort = true;
+		}
+		if (data.inventoryFavorite === undefined) {
+			data.inventoryFavorite = [];
 		}
 
 		if (callback) {
 			callback(data);
 		}
 	});
+}
+
+function setInventoryFavoriteConfig(value, callback) {
+	chrome.storage.local.set({"inventoryFavorite": value}, callback);
 }
 
 function addLog(str, callback) {
