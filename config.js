@@ -101,7 +101,7 @@
 	function updateInventorySortButton() {
 		getInventorySortConfig(function(data) {
 			const inventorySortButton = document.querySelector("#inventorySort");
-			if (!data.inventorySort) {
+			if (data.inventorySort) {
 				inventorySortButton.innerHTML = "인벤O";
 				inventorySortButton.classList.remove("error");
 			} else {
