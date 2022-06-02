@@ -109,44 +109,42 @@ function addConfirmInnPage() {
 }
 
 function makeUserListToggleable() {
-	var connectorRow = null;
 	var connectorDiv = null;
-	const holderRows = document.querySelectorAll("div.row");
+	const holderRows = document.querySelectorAll("div.col-md-12");
 	if (!holderRows) return;
 	for (var index = 0; index < holderRows.length; index ++) {
-		var holderRow = holderRows[index];
-		const holderConnectorDiv = holderRow.querySelector("div.col-md-12");
+		var holderConnectorDiv = holderRows[index];
 		if (!holderConnectorDiv || !holderConnectorDiv.textContent) continue;
 		if (!holderConnectorDiv.textContent.startsWith("접속중")) continue;
-		connectorRow = holderRow;
 		connectorDiv = holderConnectorDiv;
 		break;
 	}
-	if (!connectorRow || !connectorDiv) return;
+	if (!connectorDiv) return;
 	var connectorCount = 0;
 	try {
 		connectorCount = (connectorDiv.textContent.match(/,/g) || []).length;
 	} catch (e) {
 		console.log(e);
 	}
-	connectorRow.removeChild(connectorDiv);
+	var connectorChild = connectorDiv.innerHTML;
+	connectorDiv.innerHTML = "";
 	var detailDiv = document.createElement("details");
 	var summary = document.createElement("summary");
 	var summaryBold = document.createElement("b");
 	var summaryTextObject = document.createElement("font")
 	summaryTextObject.innerText = `▼ 접속인원을 보시려면 누르세요! (총 ${connectorCount}명) ▼`;
 	summaryTextObject.style.fontSize = "larger";
-	summary.style.marginLeft = "15px";
-	summary.style.marginRight = "15px";
+	//summary.style.marginLeft = "15px";
+	//summary.style.marginRight = "15px";
 	summary.style.lineHeight = "40px";
 	summary.style.textAlign = "center";
 	summary.style.backgroundColor = "#fcf8e3";
 	summary.style.cursor = "pointer";
 	summaryBold.append(summaryTextObject);
 	summary.append(summaryBold);
-	detailDiv.append(summary);
-	detailDiv.append(connectorDiv);
-	connectorRow.prepend(detailDiv);
+	detailDiv.innerHTML = connectorChild;
+	detailDiv.prepend(summary);
+	connectorDiv.prepend(detailDiv);
 }
 
 $(document).ready(function() {
