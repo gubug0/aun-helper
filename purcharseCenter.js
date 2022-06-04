@@ -23,7 +23,7 @@ function purcharseCenterAction() {
 		sellAllButton.classList.add("btn-sm");  
 		sellAllButton.addEventListener("click", function() {
 			radioButton.checked=true
-			inputBox.value=(itemCount <= 100 ? itemCount : 100)
+			inputBox.value=(itemCount <= 100 ? itemCount : 100);
 			purchaseForm.submit()
 		});
 		divDom.appendChild(sellAllButton)
