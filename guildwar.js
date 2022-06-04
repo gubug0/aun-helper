@@ -13,11 +13,29 @@ function monitorGuildWar() {
 	}
 	
 	const guildwarDom = document.querySelector(".glyphicon.glyphicon-tower");
-	
+	var guildTargetSelector = document.querySelector("select[name='tid']");
+	if (!guildTargetSelector && document.querySelector("frame[name='mainFrame']")) guildTargetSelector = document.querySelector("frame[name='mainFrame']").contentWindow.document.querySelector("select[name='tid']");
+
 	if (guildwarDom) {
 		setGuildWarTimeAndResetAlarm(new Date().getTime());
 		setCityRefreshNeed(true);
 		return;
+	} else if (guildTargetSelector) { // ATTACK READY PAGE
+		var currentMoneyHolder = document.querySelector("font[color='#DAA520']");
+		if (!currentMoneyHolder) return;
+		var contentHolder = document.querySelector("td[colspan='2']");
+		if (!contentHolder) return;
+		var currentMoney = 0;
+		try {
+			currentMoney = parseInt(currentMoneyHolder.textContent.substring(5, currentMoneyHolder.textContent.indexOf("골드")).replace(",",""));
+			if (currentMoney > 100000) {
+				var warningTextHolder = document.createElement("p");
+				warningTextHolder.innerText = "주머니에 골드가 좀 있는데 정말 괜찮으시겠어요?";
+				contentHolder.prepend(warningTextHolder);
+			}
+		} catch (e) {
+			console.log(e);
+		}
 	} else {
 		const errorMessageDom = document.querySelector(".msg.msg-warning.msg-danger-text");
 		if (!errorMessageDom) {
