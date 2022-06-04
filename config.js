@@ -164,6 +164,24 @@
 			})
 		})
 	}
+
+	function checkChatNotification() {
+		chrome.storage.local.get(["keywordNotificationTitle", "keywordNotificationContent", "alarmSound"], function(data) {
+			if (data.keywordNotificationTitle && data.keywordNotificationContent) {
+				chrome.storage.local.set({"keywordNotificationTitle": "", "keywordNotificationContent" : ""}, function() {
+
+				});
+				chrome.notifications.create({
+					type: 'basic',
+					iconUrl: 'logo.png',
+					title: data.keywordNotificationTitle,
+					message: data.keywordNotificationContent,
+					silent: !!data.alarmSound,
+					priority: 2
+				});
+			}
+		});
+	}
 	
 	function sendNotification(isAlarmSound) {
 		chrome.notifications.create({
@@ -393,4 +411,5 @@
 	setInterval(updateBattleLog, 3000);
 	setInterval(updateAutoBattleLog, 1000);
 	setInterval(updateRefreshedTime, 5000);
+	setInterval(checkChatNotification, 1000);
 })();
