@@ -21,9 +21,10 @@ function monitorGuildWar() {
 		if (!currentMoneyHolder) return;
 		var contentHolder = document.querySelector("td[colspan='2']");
 		if (!contentHolder) return;
-		var currentMoney = 0;
+		
 		try {
-			currentMoney = parseInt(currentMoneyHolder.textContent.substring(5, currentMoneyHolder.textContent.indexOf("골드")).replaceAll(",",""));
+			const currentMoneyText = currentMoneyHolder.textContent.replace(/.*소지금: ([0-9,]+)골드.*/, '$1').replaceAll(',', '');
+			const currentMoney = parseInt(currentMoneyText);
 			if (currentMoney > 100000) {
 				var warningTextHolder = document.createElement("p");
 				warningTextHolder.style = 'font-style: italic;color: #ff0000;font-weight: bold;font-size: large';
