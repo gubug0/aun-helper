@@ -23,7 +23,7 @@ function monitorGuildWar() {
 		if (!contentHolder) return;
 		var currentMoney = 0;
 		try {
-			currentMoney = parseInt(currentMoneyHolder.textContent.substring(5, currentMoneyHolder.textContent.indexOf("골드")).replace(",",""));
+			currentMoney = parseInt(currentMoneyHolder.textContent.substring(5, currentMoneyHolder.textContent.indexOf("골드")).replaceAll(",",""));
 			if (currentMoney > 100000) {
 				var warningTextHolder = document.createElement("p");
 				warningTextHolder.style = 'font-style: italic;color: #ff0000;font-weight: bold;font-size: large';
