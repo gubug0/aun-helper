@@ -26,6 +26,7 @@ function monitorGuildWar() {
 			currentMoney = parseInt(currentMoneyHolder.textContent.substring(5, currentMoneyHolder.textContent.indexOf("골드")).replace(",",""));
 			if (currentMoney > 100000) {
 				var warningTextHolder = document.createElement("p");
+				warningTextHolder.style = 'font-style: italic;color: #ff0000;font-weight: bold;font-size: large';
 				warningTextHolder.innerText = "주머니에 골드가 좀 있는데 정말 괜찮으시겠어요?";
 				contentHolder.prepend(warningTextHolder);
 			}
