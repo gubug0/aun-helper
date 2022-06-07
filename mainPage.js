@@ -71,6 +71,126 @@ function mainPageAction() {
 	addConfirmInnPage();
 	makeUserListToggleable();
 
+	getGuildCityData(function (data) {
+		if (!data.guildMap) {
+			return;
+		}
+		if (!data.guildData || data.guildData === "") {
+			console.log("no saved guild data");
+			return;
+		}
+		if (!data.cityData || data.cityData === "") {
+			console.log("no saved city data");
+			return;
+		}
+
+		var currentLocationHolder = document.querySelector("big[data-step='4']");
+		var currentLocation = null;
+		var currentCityName = null;
+		if (!currentLocationHolder) {
+			currentLocationHolder = document.querySelector("frame[name='mainFrame']").contentWindow.document.querySelector("big[data-step='4']");
+		}
+		if (currentLocationHolder) {
+			currentLocation = currentLocationHolder.querySelector("font[class='esd2']");
+		} else {
+			//console.log("cannot find current location holder");
+			return;
+		}
+		if (currentLocation == null) {
+			//console.log("cannot find current location holder");
+			return;
+		}
+		if (currentLocation.textContent == null) {
+			//console.log("cannot find current location text");
+			return;
+		}
+		if (currentLocation.textContent.includes(" ") && currentLocation.textContent.includes("州") && currentLocation.textContent.split(" ").length === 2) {
+			currentCityName = currentLocation.textContent.split(" ")[1];
+		} else {
+			//console.log("cannot parse current location text : " + currentLocation.textContent);
+			return;
+		}
+		if (currentCityName == null || currentCityName.length === 0) {
+			//console.log("empty currentCityName");
+			return;
+		}
+
+		console.log("currentCityName SET " + currentCityName);
+		setLastCity(currentCityName, function() {
+			var worldMapList = document.querySelectorAll("div[class='cuadro_intro_hover']");
+			if (!worldMapList) worldMapList = document.querySelector("frame[name='mainFrame']").contentWindow.document.querySelectorAll("div[class='cuadro_intro_hover']");
+			if(!worldMapList) {
+				//console.log("no worldmap found");
+				return;
+			}
+			for (var index = 0; index < worldMapList.length; index ++) {
+				var mapCityItem = worldMapList[index];
+				var mapCityName = null;
+				var mapCityNameArea = mapCityItem.querySelector("font");
+				if (!mapCityNameArea) {
+					//console.log("no mapCityNameArea");
+					continue;
+				}
+				var mapCityNameRealArea = mapCityNameArea.querySelector("b");
+				if (!mapCityNameRealArea) {
+					//console.log("no mapCityNameRealArea");
+					continue;
+				}
+				mapCityName = mapCityNameRealArea.textContent;
+				if (mapCityName == null || !mapCityName.includes("州")) {
+					//console.log("no mapCityName : " + mapCityName);
+					continue;
+				}
+				var mapCityNameSubArea = mapCityNameArea.querySelector("small");
+				if (mapCityNameSubArea) {
+					try {
+						mapCityNameArea.querySelector("nobr").removeChild(mapCityNameSubArea);
+					} catch (e) {
+						console.log(e);
+					}
+				}
+				//console.log("checking : " + mapCityName.trim());
+				var cityData = getCityData(data.cityData, mapCityName.trim());
+				if (cityData == null) {
+					//console.log("no cityData");
+					continue;
+				}
+				mapCityNameArea.style.backgroundColor = "white";
+				mapCityNameArea.style.color = "black";
+				if (!mapCityItem.querySelector("form[action='./etc.cgi?']")) {
+					// CURRENT LOCATED CITY
+					mapCityNameArea.style.backgroundColor = "black";
+					mapCityNameArea.style.color = "white";
+				}
+				if (cityData.temperature > 200) {
+					mapCityNameArea.style.color = "orange";
+				}
+				if (cityData.temperature > 600) {
+					mapCityNameArea.style.color = "darkorange";
+				}
+				if (cityData.temperature > 1400) {
+					mapCityNameArea.style.color = "red";
+				}
+				var mapCityBackground = mapCityItem.querySelector("img")
+				if (!mapCityBackground) {
+					//console.log("no mapCityBackground");
+					continue;
+				}
+				if (cityData.guild != null && cityData.guild !== "") {
+					var guildData = getGuildData(data.guildData, cityData.guild);
+					if (guildData != null && guildData.image != null) {
+						mapCityItem.style.backgroundColor = "transparent";
+						mapCityBackground.src = guildData.image;
+						mapCityBackground.style.maxWidth = "81px";
+						mapCityBackground.style.minWidth = "81px";
+					} else {
+						//console.log("no guild data for : " + cityData.guild);
+					}
+				}
+			}
+		});
+	})
+
 	isAutoBattleActive(function(isActive) {
 		if (!isActive) {
 			return;
@@ -82,7 +202,7 @@ function mainPageAction() {
                 addLog("전장복귀 대기", () => {
                     const worker = create1000msTimeoutWorker(function () {
                         worker.terminate();
-                        document.querySelector("form[action='./top.cgi'").submit();
+                        document.querySelector("form[action='./top.cgi']").submit();
                     });
                 });
             })
@@ -109,44 +229,42 @@ function addConfirmInnPage() {
 }
 
 function makeUserListToggleable() {
-	var connectorRow = null;
 	var connectorDiv = null;
-	const holderRows = document.querySelectorAll("div.row");
+	const holderRows = document.querySelectorAll("div.col-md-12");
 	if (!holderRows) return;
 	for (var index = 0; index < holderRows.length; index ++) {
-		var holderRow = holderRows[index];
-		const holderConnectorDiv = holderRow.querySelector("div.col-md-12");
+		var holderConnectorDiv = holderRows[index];
 		if (!holderConnectorDiv || !holderConnectorDiv.textContent) continue;
 		if (!holderConnectorDiv.textContent.startsWith("접속중")) continue;
-		connectorRow = holderRow;
 		connectorDiv = holderConnectorDiv;
 		break;
 	}
-	if (!connectorRow || !connectorDiv) return;
+	if (!connectorDiv) return;
 	var connectorCount = 0;
 	try {
 		connectorCount = (connectorDiv.textContent.match(/,/g) || []).length;
 	} catch (e) {
 		console.log(e);
 	}
-	connectorRow.removeChild(connectorDiv);
+	var connectorChild = connectorDiv.innerHTML;
+	connectorDiv.innerHTML = "";
 	var detailDiv = document.createElement("details");
 	var summary = document.createElement("summary");
 	var summaryBold = document.createElement("b");
 	var summaryTextObject = document.createElement("font")
 	summaryTextObject.innerText = `▼ 접속인원을 보시려면 누르세요! (총 ${connectorCount}명) ▼`;
 	summaryTextObject.style.fontSize = "larger";
-	summary.style.marginLeft = "15px";
-	summary.style.marginRight = "15px";
+	//summary.style.marginLeft = "15px";
+	//summary.style.marginRight = "15px";
 	summary.style.lineHeight = "40px";
 	summary.style.textAlign = "center";
 	summary.style.backgroundColor = "#fcf8e3";
 	summary.style.cursor = "pointer";
 	summaryBold.append(summaryTextObject);
 	summary.append(summaryBold);
-	detailDiv.append(summary);
-	detailDiv.append(connectorDiv);
-	connectorRow.prepend(detailDiv);
+	detailDiv.innerHTML = connectorChild;
+	detailDiv.prepend(summary);
+	connectorDiv.prepend(detailDiv);
 }
 
 $(document).ready(function() {

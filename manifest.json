@@ -24,7 +24,8 @@
 		"guildwar.js",
 		"chatHelper.js",
 		"logCollector.js",
-		"fishing_mining.js"
+		"fishing_mining.js",
+		"inventory.js"
 	],
     "matches": ["https://aun.kr/*"],
     "run_at": "document_end"
