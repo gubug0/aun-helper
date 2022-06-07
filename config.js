@@ -43,13 +43,13 @@
 		chrome.storage.local.get(["inventorySort"], function(data) {
 			if (data.inventorySort === undefined) {
 				data.inventorySort = true;
-      }
+			}
 
 			if (callback) {
 				callback(data);
 			}
 		});
-  }
+	}
 
 	function getCityRefreshNeed(callback) {
 		chrome.storage.local.get(["cityRefresh"], function(data) {
@@ -66,7 +66,8 @@
 
 	function setInventorySortConfig(value, callback) {
 		chrome.storage.local.set({"inventorySort": value}, callback);
-  }
+	}
+	
 	function getGuildMapConfig(callback) {
 		chrome.storage.local.get(["guildMap"], function(data) {
 			if (data.guildMap === undefined) {
@@ -81,7 +82,6 @@
    
 	function setGuildMap(value, callback) {
 		chrome.storage.local.set({"guildMap": value}, callback);
-
 	}
 	function setRefreshAlarmActivation(value, callback) {
 		chrome.storage.local.set({"refreshAlarmActivation": value}, callback);
