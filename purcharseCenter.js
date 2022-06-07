@@ -16,14 +16,14 @@ function purcharseCenterAction() {
 		
 		const divDom = document.createElement("div");
 		const sellAllButton = document.createElement("input");
-		sellAllButton.value="전체매각";
+		sellAllButton.value=(itemCount <= 100 ? "전체매각" : "100개매각");
 		sellAllButton.type="button";
 		sellAllButton.classList.add("btn");
 		sellAllButton.classList.add("btn-danger");
 		sellAllButton.classList.add("btn-sm");  
 		sellAllButton.addEventListener("click", function() {
 			radioButton.checked=true
-			inputBox.value=itemCount
+			inputBox.value=(itemCount <= 100 ? itemCount : 100)
 			purchaseForm.submit()
 		});
 		divDom.appendChild(sellAllButton)
