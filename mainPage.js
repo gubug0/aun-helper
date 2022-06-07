@@ -64,13 +64,7 @@ function findAndAddPurchaseLog(callback) {
     }
 }
 
-function mainPageAction() {
-	if (window.location.pathname !== "/MainPage" && window.location.pathname !== "/top.cgi") {
-		return;
-	}
-	addConfirmInnPage();
-	makeUserListToggleable();
-
+function updateGuildMap() {
 	getGuildCityData(function (data) {
 		if (!data.guildMap) {
 			return;
@@ -178,18 +172,27 @@ function mainPageAction() {
 				}
 				if (cityData.guild != null && cityData.guild !== "") {
 					var guildData = getGuildData(data.guildData, cityData.guild);
+					mapCityItem.style.backgroundColor = "transparent";
+					mapCityBackground.style.maxWidth = "81px";
+					mapCityBackground.style.minWidth = "81px";
 					if (guildData != null && guildData.image != null) {
-						mapCityItem.style.backgroundColor = "transparent";
 						mapCityBackground.src = guildData.image;
-						mapCityBackground.style.maxWidth = "81px";
-						mapCityBackground.style.minWidth = "81px";
 					} else {
-						//console.log("no guild data for : " + cityData.guild);
+						mapCityBackground.src = "https://aun.kr/img/default_guild.png";
 					}
 				}
 			}
 		});
 	})
+}
+
+function mainPageAction() {
+	if (window.location.pathname !== "/MainPage" && window.location.pathname !== "/top.cgi") {
+		return;
+	}
+	addConfirmInnPage();
+	makeUserListToggleable();
+	updateGuildMap();
 
 	isAutoBattleActive(function(isActive) {
 		if (!isActive) {
