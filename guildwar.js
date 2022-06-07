@@ -4,6 +4,9 @@ function setGuildWarTimeAndResetAlarm(time, callback) {
 		"guildWarNeedAlarm": true,
 	}, callback);
 }
+function setCityRefreshNeed(value, callback) {
+	chrome.storage.local.set({"cityRefresh": value}, callback);
+}
 function monitorGuildWar() {
 	if (window.location.pathname !== '/etc.cgi') {
 		return;
@@ -15,6 +18,7 @@ function monitorGuildWar() {
 
 	if (guildwarDom) {
 		setGuildWarTimeAndResetAlarm(new Date().getTime());
+		setCityRefreshNeed(true);
 		return;
 	} else if (guildTargetSelector) { // ATTACK READY PAGE
 		var currentMoneyHolder = document.querySelector("font[color='#DAA520']");
