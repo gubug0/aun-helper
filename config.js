@@ -39,6 +39,18 @@
 			}
 		});
 	}
+	function getInventorySortConfig(callback) {
+		chrome.storage.local.get(["inventorySort"], function(data) {
+			if (data.inventorySort === undefined) {
+				data.inventorySort = true;
+			}
+
+			if (callback) {
+				callback(data);
+			}
+		});
+	}
+
 	function getCityRefreshNeed(callback) {
 		chrome.storage.local.get(["cityRefresh"], function(data) {
 			if (data.cityRefresh === undefined) {
@@ -50,6 +62,12 @@
 			}
 		});
 	}
+   
+
+	function setInventorySortConfig(value, callback) {
+		chrome.storage.local.set({"inventorySort": value}, callback);
+	}
+	
 	function getGuildMapConfig(callback) {
 		chrome.storage.local.get(["guildMap"], function(data) {
 			if (data.guildMap === undefined) {
@@ -61,6 +79,7 @@
 			}
 		});
 	}
+   
 	function setGuildMap(value, callback) {
 		chrome.storage.local.set({"guildMap": value}, callback);
 	}
@@ -115,6 +134,19 @@
 			} else {
 				guildMapButton.innerHTML = "길드맵X";
 				guildMapButton.classList.add("error");
+			}
+		})
+	}
+
+	function updateInventorySortButton() {
+		getInventorySortConfig(function(data) {
+			const inventorySortButton = document.querySelector("#inventorySort");
+			if (data.inventorySort) {
+				inventorySortButton.innerHTML = "인벤O";
+				inventorySortButton.classList.remove("error");
+			} else {
+				inventorySortButton.innerHTML = "인벤X";
+				inventorySortButton.classList.add("error");
 			}
 		})
 	}
@@ -521,6 +553,16 @@
 			});
 		});
 	});
+
+	document.querySelector("#inventorySort").addEventListener("click", function() {
+		getInventorySortConfig(function(data) {
+			const isInventorySort = !data.inventorySort
+
+			setInventorySortConfig(isInventorySort, function() {
+				updateInventorySortButton();
+			});
+		});
+	});
 	
 	document.querySelector("#changeActivationGuildWarAlarm").addEventListener("click", function() {
 		getGuildWarAlarmConfig(function(data) {
@@ -571,6 +613,7 @@
 	updateGuildWarAlarmDurationConfig();
 	updateRefreshedTime();
 	updateRefreshAlarmActivationButton();
+	updateInventorySortButton();
 	updateGuildStatus();
 	updateCityStatus();
 
