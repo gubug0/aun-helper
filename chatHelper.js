@@ -37,17 +37,17 @@ function makeChatShortcuts() {
 
         var short1Div = chatDocument.createElement("div");
         short1Div.id = "chatshort1";
-        var short1DivText = chatDocument.createElement("span");
-        short1DivText.innerHTML = "<b>단축1</b>";
-        short1DivText.style.marginLeft = "6px";
-        short1DivText.onclick = function () {
+        var short1DivButton = chatDocument.createElement("button");
+        short1DivButton.innerHTML = "<b>단축1</b>";
+        short1DivButton.style = "color: rgb(255, 255, 255);border-radius: 4px 0 0 4px;background: rgb(100, 100, 147);padding-right: 3px;border-right-width: 1px;border-right-color: #b7b7db;border-right-style: dashed;";
+        short1DivButton.onclick = function () {
             var inputDiv = chatDocument.querySelector("div.chatInput");
             if (inputDiv) inputDiv.innerHTML = data.chatshort1;
         };
-        short1Div.append(short1DivText);
-        var short1DivSetting = chatDocument.createElement("span");
+        short1Div.append(short1DivButton);
+        var short1DivSetting = chatDocument.createElement("button");
         short1DivSetting.innerHTML = "설정";
-        short1DivSetting.style.marginLeft = "3px";
+        short1DivSetting.style = "color: rgb(255, 255, 255);border-color: white;border-radius: 0 4px 4px 0;background: rgb(100, 100, 147);margin-left: 0;padding-left: 3px;";
         short1DivSetting.onclick = function () {
             var chatshort1 = prompt("단축1 대화를 입력하세요", data.chatshort1);
             if (chatshort1 !== undefined && chatshort1 !== null && chatshort1.length > 0) {
@@ -61,17 +61,17 @@ function makeChatShortcuts() {
 
         var short2Div = chatDocument.createElement("div");
         short2Div.id = "chatshort2";
-        var short2DivText = chatDocument.createElement("span");
+        var short2DivText = chatDocument.createElement("button");
         short2DivText.innerHTML = "<b>단축2<b/>";
-        short2DivText.style.marginLeft = "6px";
+        short2DivText.style = "color: rgb(255, 255, 255);margin-left: 3px;border-radius: 4px 0 0 4px;background: rgb(100, 100, 147);padding-right: 3px;border-right-width: 1px;border-right-color: #b7b7db;border-right-style: dashed;";
         short2DivText.onclick = function () {
             var inputDiv = chatDocument.querySelector("div.chatInput");
             if (inputDiv) inputDiv.innerHTML = data.chatshort2;
         };
         short2Div.append(short2DivText);
-        var short2DivSetting = chatDocument.createElement("span");
+        var short2DivSetting = chatDocument.createElement("button");
         short2DivSetting.innerHTML = "설정";
-        short2DivSetting.style.marginLeft = "3px";
+        short2DivSetting.style = "color: rgb(255, 255, 255);border-color: white;border-radius: 0 4px 4px 0;background: rgb(100, 100, 147);margin-left: 0;padding-left: 3px;";
         short2DivSetting.onclick = function () {
             var chatshort2 = prompt("단축2 대화를 입력하세요", data.chatshort2);
             if (chatshort2 !== undefined && chatshort2 !== null && chatshort2.length > 0) {
@@ -85,9 +85,9 @@ function makeChatShortcuts() {
 
         var keywordDiv = chatDocument.createElement("div");
         keywordDiv.id = "chatkeyword";
-        var keywordText =  chatDocument.createElement("span");
+        var keywordText =  chatDocument.createElement("button");
         keywordText.innerHTML = "<b>키워드</b>";
-        keywordText.style.marginLeft = "8px";
+        keywordText.style = "color: rgb(255, 255, 255);margin-left: 3px;border-radius: 4px;background: rgb(100, 100, 147);";
         keywordText.onclick = function () {
             var keywords = prompt("알림을 받을 키워드를 입력하세요 (여러개는 , 로 구분)", data.chatkeywords);
             if (keywords !== undefined && keywords !== null && keywords.length > 0) {
