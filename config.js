@@ -398,6 +398,14 @@
 					var guildDataObject = {};
 					var guildItem = guildList[index];
 					//console.log(guildItem);
+					var guildIndex = -1;
+					try {
+						var guildInfo = guildItem.querySelectorAll("td")[2].textContent;
+						guildIndex = guildInfo.substring(guildInfo.lastIndexOf("코드넘버: ") + 6);
+					} catch (e) {
+						console.log(e);
+					}
+					guildDataObject.guildIndex = guildIndex;
 					var guildRank = guildItem.querySelector("nobr");
 					if (guildRank != null && guildRank.textContent != null && guildRank.textContent.length > 0) {
 						guildDataObject.rank = guildRank.textContent;
@@ -434,16 +442,6 @@
 
 	function setCityRefreshNeed(value, callback) {
 		chrome.storage.local.set({"cityRefresh": value}, callback);
-	}
-
-	function monitorCityUpdateNeeded() {
-		getCityRefreshNeed(function(data) {
-			if (data.cityRefresh) {
-				setCityRefreshNeed(false, function() {
-					updateCityStatus();
-				})
-			}
-		})
 	}
 
 	function updateCityStatus() {
@@ -641,5 +639,4 @@
 	setInterval(checkChatNotification, 1000);
 	setInterval(updateGuildStatus, 600000);
 	setInterval(updateCityStatus, 10000);
-	setInterval(monitorCityUpdateNeeded, 1000);
 })();
