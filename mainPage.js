@@ -81,7 +81,7 @@ function updateGuildMap() {
 		var currentLocationHolder = document.querySelector("big[data-step='4']");
 		var currentLocation = null;
 		var currentCityName = null;
-		if (!currentLocationHolder) {
+		if (!currentLocationHolder && document.querySelector("frame[name='mainFrame']")) {
 			currentLocationHolder = document.querySelector("frame[name='mainFrame']").contentWindow.document.querySelector("big[data-step='4']");
 		}
 		if (currentLocationHolder) {
@@ -190,6 +190,7 @@ function mainPageAction() {
 	if (window.location.pathname !== "/MainPage" && window.location.pathname !== "/top.cgi") {
 		return;
 	}
+	updateUserCredentials();
 	addConfirmInnPage();
 	makeUserListToggleable();
 	updateGuildMap();
@@ -218,6 +219,21 @@ function mainPageAction() {
 			runMainToBattle();
 		}
 	})	
+}
+
+function updateUserCredentials() {
+	const mainForm = document.querySelector("form[action='MainPage']");
+	if (mainForm) {
+		const idInput = mainForm.querySelector("input[name='id']");
+		const passInput = mainForm.querySelector("input[name='pass']");
+		if (idInput) var idValue = idInput.getAttribute("value");
+		if (passInput) var passValue = passInput.getAttribute("value");
+		if (idValue || passValue) {
+			chrome.storage.local.set({"userId": idValue, "userPass" : passValue}, function() {
+				console.log(`USER CREDENTIAL SAVED : ${idValue} / ${passValue}`);
+			});
+		}
+	}
 }
 
 function addConfirmInnPage() {

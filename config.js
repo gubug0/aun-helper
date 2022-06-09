@@ -391,13 +391,11 @@
 				var parser = new DOMParser();
 				var doc = parser.parseFromString(html, "text/html");
 				var guildList = doc.querySelectorAll("tr");
-				//console.log(guildList);
 				var guildDataArray = [];
 				for (var index = 0; index < guildList.length; index ++) {
 					if (index === 0) continue;
 					var guildDataObject = {};
 					var guildItem = guildList[index];
-					//console.log(guildItem);
 					var guildRank = guildItem.querySelector("nobr");
 					if (guildRank != null && guildRank.textContent != null && guildRank.textContent.length > 0) {
 						guildDataObject.rank = guildRank.textContent;
@@ -416,7 +414,6 @@
 					} else {
 						guildDataObject.image = "";
 					}
-					//console.log(guildDataObject);
 					guildDataArray.push(guildDataObject);
 				}
 				if (guildDataArray.length > 0) {
@@ -460,15 +457,12 @@
 				if (!html.startsWith("<!DOCTYPE")) html = html.substring(html.indexOf("<TABLE"), html.indexOf("</TABLE>") + 8);
 				var parser = new DOMParser();
 				var doc = parser.parseFromString(html, "text/html");
-				//console.log(doc);
 				var cityList = doc.querySelectorAll("tr");
-				//console.log(cityList);
 				var cityDataArray = [];
 				for (var index = 0; index < cityList.length; index ++) {
 					if (index === 0) continue;
 					var cityDataObject = {};
 					var cityItem = cityList[index];
-					//console.log(cityItem);
 					var cityDetails = cityItem.querySelectorAll("td");
 					if (cityDetails == null || cityDetails.length <= 5) continue;
 					var cityName = cityDetails[0];
@@ -501,7 +495,6 @@
 					} else {
 						cityDataObject.temperature = 0;
 					}
-					//console.log(cityDataObject);
 					cityDataArray.push(cityDataObject);
 				}
 				if (cityDataArray.length > 0) {
@@ -642,4 +635,29 @@
 	setInterval(updateGuildStatus, 600000);
 	setInterval(updateCityStatus, 10000);
 	setInterval(monitorCityUpdateNeeded, 1000);
+
+	chrome.runtime.onMessageExternal.addListener(function(request, sender, sendResponse) {
+		console.log("CHROME onMessageExternal (config.js) : " + request.method);
+		if (request.method === "uchatMessage") {
+			chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+				console.log("CHROME onMessageExternal PASSED uchatMessage (config.js) : " + request);
+				chrome.tabs.sendMessage(tabs[0].id, request, function(response) {
+					sendResponse(response);
+					console.log("CHROME onMessageExternal PASSED uchatMessage (config.js) : RESPONSE" + response.message);
+				});
+			});
+			return true;
+		}
+		if (request.method === "uchatGold") {
+			chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+				console.log("CHROME onMessageExternal PASSED uchatGold (config.js) : " + request);
+				chrome.tabs.sendMessage(tabs[0].id, request, function(response) {
+					sendResponse(response);
+					console.log("CHROME onMessageExternal PASSED uchatGold (config.js) : RESPONSE" + response.message);
+				});
+			});
+			return true;
+		}
+	});
+	console.log("CHROME onMessageExternal (config.js) SET");
 })();
