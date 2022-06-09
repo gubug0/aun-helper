@@ -62,7 +62,7 @@
 			}
 		});
 	}
-   
+
 
 	function setInventorySortConfig(value, callback) {
 		chrome.storage.local.set({"inventorySort": value}, callback);
@@ -136,9 +136,17 @@
 				guildMapButton.classList.add("error");
 			}
 		})
-	}
+		getRefreshAlarmConfig(function(data) {
+			const activationButton = document.querySelector("#changeActivationRefreshAlarm");
 
-	function updateInventorySortButton() {
+			if (data.refreshAlarmActivation) {
+				activationButton.innerHTML = "상생 알람 종료"
+				activationButton.classList.add("error");
+			} else {
+				activationButton.innerHTML = "상생 알람 사용"
+				activationButton.classList.remove("error");
+			}
+		})
 		getInventorySortConfig(function(data) {
 			const inventorySortButton = document.querySelector("#inventorySort");
 			if (data.inventorySort) {
@@ -367,20 +375,6 @@
 			}
 		});
 	}
-	
-	function updateRefreshAlarmActivationButton() {
-		getRefreshAlarmConfig(function(data) {
-			const activationButton = document.querySelector("#changeActivationRefreshAlarm");
-			
-			if (data.refreshAlarmActivation) {
-				activationButton.innerHTML = "상생 알람 종료"
-				activationButton.classList.add("error");
-			} else {
-				activationButton.innerHTML = "상생 알람 사용"
-				activationButton.classList.remove("error");
-			}
-		})
-	}
 
 	function updateGuildStatus() {
 		try {
@@ -577,7 +571,7 @@
 			const isInventorySort = !data.inventorySort
 
 			setInventorySortConfig(isInventorySort, function() {
-				updateInventorySortButton();
+				updateEtcButton();
 			});
 		});
 	});
@@ -595,7 +589,7 @@
 		getRefreshAlarmConfig(function(data) {
 			const refreshAlarmActivation = !data.refreshAlarmActivation
 			setRefreshAlarmActivation(refreshAlarmActivation, function() {
-				updateRefreshAlarmActivationButton();
+				updateEtcButton();
 			})
 		});
 	});
@@ -630,8 +624,6 @@
 	updateGuildWarStatus();
 	updateGuildWarAlarmDurationConfig();
 	updateRefreshedTime();
-	updateRefreshAlarmActivationButton();
-	updateInventorySortButton();
 	updateGuildStatus();
 	updateCityStatus();
 
