@@ -62,7 +62,17 @@
 			}
 		});
 	}
+	function getDarkLogConfig(callback) {
+		chrome.storage.local.get(["darkLog"], function(data) {
+			if (data.darkLog === undefined) {
+				data.darkLog = true;
+			}
 
+			if (callback) {
+				callback(data);
+			}
+		});
+	}
 
 	function setInventorySortConfig(value, callback) {
 		chrome.storage.local.set({"inventorySort": value}, callback);
@@ -79,7 +89,10 @@
 			}
 		});
 	}
-   
+
+	function setDarkLog(value, callback) {
+		chrome.storage.local.set({"darkLog": value}, callback);
+	}
 	function setGuildMap(value, callback) {
 		chrome.storage.local.set({"guildMap": value}, callback);
 	}
@@ -155,6 +168,16 @@
 			} else {
 				inventorySortButton.innerHTML = "인벤X";
 				inventorySortButton.classList.add("error");
+			}
+		})
+		getDarkLogConfig(function(data) {
+			const darkLogButton = document.querySelector("#darkLog");
+			if (data.darkLog) {
+				darkLogButton.innerHTML = "다크몹O";
+				darkLogButton.classList.remove("error");
+			} else {
+				darkLogButton.innerHTML = "다크몹X";
+				darkLogButton.classList.add("error");
 			}
 		})
 	}
@@ -589,6 +612,15 @@
 		getRefreshAlarmConfig(function(data) {
 			const refreshAlarmActivation = !data.refreshAlarmActivation
 			setRefreshAlarmActivation(refreshAlarmActivation, function() {
+				updateEtcButton();
+			})
+		});
+	});
+
+	document.querySelector("#darkLog").addEventListener("click", function() {
+		getDarkLogConfig(function(data) {
+			const darkLogStatus = !data.darkLog
+			setDarkLog(darkLogStatus, function() {
 				updateEtcButton();
 			})
 		});

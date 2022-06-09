@@ -25,7 +25,7 @@ function processNewRefresh() {
 	});
 }
 
-function parseLogMessage(log) {
+function parseLogMessage(log, logConfig) {
 	$('small', log).each((index, item) => {
 		if (!item.textContent) {
 			return;
@@ -73,7 +73,7 @@ function parseLogMessage(log) {
 		
 		const logItems = []
 
-		if (currentLog.filter(item => item.type.match(/^[0-9]+등급$/)).length > 0) {
+		if (logConfig.darkLog && currentLog.filter(item => item.type.match(/^[0-9]+등급$/)).length > 0) {
 			currentLog
 			.filter(item => item.type.match(/^[0-9]+등급$/))
 			.forEach(item => {
@@ -82,7 +82,7 @@ function parseLogMessage(log) {
 				logItems.push(`[닼몹] ${city}州 ${item.type} ${name} 출현`);
 			});
 		}
-		if (currentLog.filter(item => item.type.match(/^[0-9]+등급보상$/)).length > 0) {
+		if (logConfig.darkLog && currentLog.filter(item => item.type.match(/^[0-9]+등급보상$/)).length > 0) {
 			currentLog
 			.filter(item => item.type.match(/^[0-9]+등급보상$/))
 			.forEach(item => {
@@ -118,7 +118,9 @@ function injectHttpRequestScript() {
 function requestGameLog() {
 	$.get("/logservice_xs.php", function(data) {
 		sendLogMessage(data);
-		parseLogMessage(data);
+		getLoggingConfig(function(logConfig) {
+			parseLogMessage(data, logConfig);
+		});
 	});
 }
 function sendLogMessage(message) {

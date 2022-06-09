@@ -67,6 +67,17 @@ function getGuildData(guildDataArray, guildName) {
 	}
 	return null;
 }
+function getLoggingConfig(callback) {
+	chrome.storage.local.get(["darkLog"], function(data) {
+		if (data.darkLog === undefined) {
+			data.darkLog = true;
+		}
+
+		if (callback) {
+			callback(data);
+		}
+	});
+}
 
 function setLastCity(value, callback) {
 	chrome.storage.local.set({"lastCity": value}, callback);
