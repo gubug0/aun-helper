@@ -68,9 +68,12 @@ function getGuildData(guildDataArray, guildName) {
 	return null;
 }
 function getLoggingConfig(callback) {
-	chrome.storage.local.get(["darkLog"], function(data) {
+	chrome.storage.local.get(["darkLog", "bossParticipant"], function(data) {
 		if (data.darkLog === undefined) {
 			data.darkLog = true;
+		}
+		if (data.bossParticipant === undefined) {
+			data.bossParticipant = "-";
 		}
 
 		if (callback) {

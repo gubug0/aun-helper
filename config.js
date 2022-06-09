@@ -231,7 +231,16 @@
 			const logDom = document.querySelector("#log")
 			logDom.innerHTML = data.battleLog
 		});
-	};
+	}
+
+	function updateBossStatus() {
+		chrome.storage.local.get(["bossTitle", "bossParticipant"], function(data) {
+			const bossTitle = document.querySelector("#bossTitle");
+			if (bossTitle) bossTitle.innerHTML = data.bossTitle;
+			const bossParticipant = document.querySelector("#bossStatus");
+			if (bossParticipant) bossParticipant.innerHTML = data.bossParticipant;
+		});
+	}
 	
 	function clearBattleLog() {
 		chrome.storage.local.set({"battleLog": ""}, updateBattleLog);
@@ -646,6 +655,8 @@
 			}
 		}
 	);
+
+	chrome.storage.local.set({"bossParticipant": "-", "bossTitle": "-"});
 	
 	updateAutoBattleLog();
 	updateActiveButton();
@@ -661,6 +672,7 @@
 
 	setInterval(updateBattleLog, 3000);
 	setInterval(updateAutoBattleLog, 1000);
+	setInterval(updateBossStatus, 1500);
 	setInterval(updateRefreshedTime, 5000);
 	setInterval(checkChatNotification, 1000);
 	setInterval(updateGuildStatus, 600000);
