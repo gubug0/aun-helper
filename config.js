@@ -39,6 +39,50 @@
 			}
 		});
 	}
+	function getInventorySortConfig(callback) {
+		chrome.storage.local.get(["inventorySort"], function(data) {
+			if (data.inventorySort === undefined) {
+				data.inventorySort = true;
+			}
+
+			if (callback) {
+				callback(data);
+			}
+		});
+	}
+
+	function getCityRefreshNeed(callback) {
+		chrome.storage.local.get(["cityRefresh"], function(data) {
+			if (data.cityRefresh === undefined) {
+				data.cityRefresh = false;
+			}
+
+			if (callback) {
+				callback(data);
+			}
+		});
+	}
+   
+
+	function setInventorySortConfig(value, callback) {
+		chrome.storage.local.set({"inventorySort": value}, callback);
+	}
+	
+	function getGuildMapConfig(callback) {
+		chrome.storage.local.get(["guildMap"], function(data) {
+			if (data.guildMap === undefined) {
+				data.guildMap = false;
+			}
+
+			if (callback) {
+				callback(data);
+			}
+		});
+	}
+   
+	function setGuildMap(value, callback) {
+		chrome.storage.local.set({"guildMap": value}, callback);
+	}
 	function setRefreshAlarmActivation(value, callback) {
 		chrome.storage.local.set({"refreshAlarmActivation": value}, callback);
 	}
@@ -71,7 +115,7 @@
 		});
 	}
 	
-	function updateAlarmSoundButton() {
+	function updateEtcButton() {
 		getGuildWarAlarmConfig(function(data) {
 			const alarmSoundButton = document.querySelector("#alarmSound");
 			if (!data.alarmSound) {
@@ -80,6 +124,29 @@
 			} else {
 				alarmSoundButton.innerHTML = "알람소리X";
 				alarmSoundButton.classList.add("error");
+			}
+		})
+		getGuildMapConfig(function(data) {
+			const guildMapButton = document.querySelector("#guildMap");
+			if (data.guildMap) {
+				guildMapButton.innerHTML = "길드맵O";
+				guildMapButton.classList.remove("error");
+			} else {
+				guildMapButton.innerHTML = "길드맵X";
+				guildMapButton.classList.add("error");
+			}
+		})
+	}
+
+	function updateInventorySortButton() {
+		getInventorySortConfig(function(data) {
+			const inventorySortButton = document.querySelector("#inventorySort");
+			if (data.inventorySort) {
+				inventorySortButton.innerHTML = "인벤O";
+				inventorySortButton.classList.remove("error");
+			} else {
+				inventorySortButton.innerHTML = "인벤X";
+				inventorySortButton.classList.add("error");
 			}
 		})
 	}
@@ -163,6 +230,24 @@
 				
 			})
 		})
+	}
+
+	function checkChatNotification() {
+		chrome.storage.local.get(["keywordNotificationTitle", "keywordNotificationContent", "alarmSound"], function(data) {
+			if (data.keywordNotificationTitle && data.keywordNotificationContent) {
+				chrome.storage.local.set({"keywordNotificationTitle": "", "keywordNotificationContent" : ""}, function() {
+
+				});
+				chrome.notifications.create({
+					type: 'basic',
+					iconUrl: 'logo.png',
+					title: data.keywordNotificationTitle,
+					message: data.keywordNotificationContent,
+					silent: !!data.alarmSound,
+					priority: 2
+				});
+			}
+		});
 	}
 	
 	function sendNotification(isAlarmSound) {
@@ -296,6 +381,143 @@
 			}
 		})
 	}
+
+	function updateGuildStatus() {
+		try {
+			var headers = new Headers();
+			headers.append('Content-Type','text/html; charset=EUC-KR');
+			fetch('https://aun.kr/guild', headers).then((response) => response.text()).then(html => {
+				if (!html.startsWith("<!DOCTYPE")) html = html.substring(html.indexOf("<TABLE"), html.indexOf("</TABLE>") + 8);
+				var parser = new DOMParser();
+				var doc = parser.parseFromString(html, "text/html");
+				var guildList = doc.querySelectorAll("tr");
+				//console.log(guildList);
+				var guildDataArray = [];
+				for (var index = 0; index < guildList.length; index ++) {
+					if (index === 0) continue;
+					var guildDataObject = {};
+					var guildItem = guildList[index];
+					//console.log(guildItem);
+					var guildRank = guildItem.querySelector("nobr");
+					if (guildRank != null && guildRank.textContent != null && guildRank.textContent.length > 0) {
+						guildDataObject.rank = guildRank.textContent;
+					} else {
+						guildDataObject.rank = 0;
+					}
+					var guildName = guildItem.querySelector("h3 b");
+					if (guildName != null && guildName.textContent != null && guildName.textContent.length > 0) {
+						guildDataObject.title = guildName.textContent;
+					} else {
+						guildDataObject.title = "";
+					}
+					var guildImage = guildItem.querySelector("img");
+					if (guildImage != null && guildImage.src != null && guildImage.src.length > 0) {
+						guildDataObject.image = guildImage.src;
+					} else {
+						guildDataObject.image = "";
+					}
+					//console.log(guildDataObject);
+					guildDataArray.push(guildDataObject);
+				}
+				if (guildDataArray.length > 0) {
+					chrome.storage.local.set({"guildData": guildDataArray}, function() {
+
+					});
+				} else {
+					console.log("guildDataArray is Empty")
+				}
+			});
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	function setCityRefreshNeed(value, callback) {
+		chrome.storage.local.set({"cityRefresh": value}, callback);
+	}
+
+	function monitorCityUpdateNeeded() {
+		getCityRefreshNeed(function(data) {
+			if (data.cityRefresh) {
+				setCityRefreshNeed(false, function() {
+					updateCityStatus();
+				})
+			}
+		})
+	}
+
+	function updateCityStatus() {
+		try {
+			const xhr = new XMLHttpRequest();
+			xhr.responseType = "arraybuffer";
+			xhr.onload = function() {
+				const contenttype = xhr.getResponseHeader("content-type");
+				var charset = contenttype.substring(contenttype.indexOf("charset=") + 8);
+				charset = "euc-kr";
+				const dataView = new DataView(xhr.response);
+				const decoder = new TextDecoder(charset);
+				var html = decoder.decode(dataView);
+				if (!html.startsWith("<!DOCTYPE")) html = html.substring(html.indexOf("<TABLE"), html.indexOf("</TABLE>") + 8);
+				var parser = new DOMParser();
+				var doc = parser.parseFromString(html, "text/html");
+				//console.log(doc);
+				var cityList = doc.querySelectorAll("tr");
+				//console.log(cityList);
+				var cityDataArray = [];
+				for (var index = 0; index < cityList.length; index ++) {
+					if (index === 0) continue;
+					var cityDataObject = {};
+					var cityItem = cityList[index];
+					//console.log(cityItem);
+					var cityDetails = cityItem.querySelectorAll("td");
+					if (cityDetails == null || cityDetails.length <= 5) continue;
+					var cityName = cityDetails[0];
+					if (cityName != null && cityName.textContent != null && cityName.textContent.length > 0) {
+						cityDataObject.title = cityName.textContent;
+					} else {
+						cityDataObject.title = "";
+					}
+					var cityOwner = cityDetails[1];
+					if (cityOwner != null && cityOwner.textContent != null && cityOwner.textContent.length > 0) {
+						cityDataObject.owner = cityOwner.textContent;
+					} else {
+						cityDataObject.owner = "";
+					}
+					var cityNation = cityDetails[2];
+					if (cityNation != null && cityNation.textContent != null && cityNation.textContent.length > 0) {
+						cityDataObject.nation = cityNation.textContent;
+					} else {
+						cityDataObject.nation = "";
+					}
+					var cityGuild = cityDetails[3];
+					if (cityGuild != null && cityGuild.textContent != null && cityGuild.textContent.length > 0) {
+						cityDataObject.guild = cityGuild.textContent;
+					} else {
+						cityDataObject.guild = "";
+					}
+					var cityTemp = cityDetails[7];
+					if (cityTemp != null && cityTemp.textContent != null && cityTemp.textContent.length > 0) {
+						cityDataObject.temperature = cityTemp.textContent.replace("℃","").trim();
+					} else {
+						cityDataObject.temperature = 0;
+					}
+					//console.log(cityDataObject);
+					cityDataArray.push(cityDataObject);
+				}
+				if (cityDataArray.length > 0) {
+					chrome.storage.local.set({"cityData": cityDataArray}, function() {
+
+					});
+				} else {
+					console.log("cityDataArray is Empty")
+				}
+			}
+			xhr.open("GET", "https://aun.kr/tprint");
+			xhr.send(null);
+		} catch (e) {
+			console.log(e);
+		}
+	}
 	
 	document.querySelector("#activateAuto").addEventListener("click", function() {
 		
@@ -335,7 +557,27 @@
 			const isAlarmSound = !data.alarmSound
 			
 			setAlarmSound(isAlarmSound, function() {
-				updateAlarmSoundButton();
+				updateEtcButton();
+			});
+		});
+	});
+
+	document.querySelector("#guildMap").addEventListener("click", function() {
+		getGuildMapConfig(function(data) {
+			const isGuildMap = !data.guildMap
+
+			setGuildMap(isGuildMap, function() {
+				updateEtcButton();
+			});
+		});
+	});
+
+	document.querySelector("#inventorySort").addEventListener("click", function() {
+		getInventorySortConfig(function(data) {
+			const isInventorySort = !data.inventorySort
+
+			setInventorySortConfig(isInventorySort, function() {
+				updateInventorySortButton();
 			});
 		});
 	});
@@ -381,7 +623,7 @@
 	
 	updateAutoBattleLog();
 	updateActiveButton();
-	updateAlarmSoundButton();
+	updateEtcButton();
 	updateGuildWarAlarmActivationButton();
 	updateBattleDuration();
 	updateBattleLog();
@@ -389,8 +631,15 @@
 	updateGuildWarAlarmDurationConfig();
 	updateRefreshedTime();
 	updateRefreshAlarmActivationButton();
+	updateInventorySortButton();
+	updateGuildStatus();
+	updateCityStatus();
 
 	setInterval(updateBattleLog, 3000);
 	setInterval(updateAutoBattleLog, 1000);
 	setInterval(updateRefreshedTime, 5000);
+	setInterval(checkChatNotification, 1000);
+	setInterval(updateGuildStatus, 600000);
+	setInterval(updateCityStatus, 10000);
+	setInterval(monitorCityUpdateNeeded, 1000);
 })();
