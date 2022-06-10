@@ -192,6 +192,7 @@ function mainPageAction() {
 	}
 	addConfirmInnPage();
 	makeUserListToggleable();
+	makeInvitePointToggleable();
 	updateGuildMap();
 
 	isAutoBattleActive(function(isActive) {
@@ -268,6 +269,27 @@ function makeUserListToggleable() {
 	detailDiv.innerHTML = connectorChild;
 	detailDiv.prepend(summary);
 	connectorDiv.prepend(detailDiv);
+}
+
+function makeInvitePointToggleable() {
+	var invitePointTable = document.querySelector("table[data-intro='홍보포인트를 모아 골드가 나오는 행운상자로 교환하세요.']");
+	if (!invitePointTable) return;
+	var invitePointParent = invitePointTable.parentElement;
+	invitePointParent.removeChild(invitePointTable);
+	var detailDiv = document.createElement("details");
+	var summary = document.createElement("summary");
+	var summaryBold = document.createElement("b");
+	var summaryTextObject = document.createElement("font")
+	summaryTextObject.innerText = `▼ 홍보포인트 상세보기 ▼`;
+	summary.style.lineHeight = "32px";
+	summary.style.textAlign = "center";
+	summary.style.backgroundColor = "#e3fce9";
+	summary.style.cursor = "pointer";
+	summaryBold.append(summaryTextObject);
+	summary.append(summaryBold);
+	detailDiv.innerHTML = invitePointTable.outerHTML;
+	detailDiv.prepend(summary);
+	invitePointParent.append(detailDiv);
 }
 
 $(document).ready(function() {

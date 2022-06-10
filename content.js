@@ -208,9 +208,34 @@ function injectConfigPage(srcFile) {
 	parentFrameset.insertBefore(frameset, parentFrameset.lastChild)
 }
 
+function makeTotalPointShorter() {
+	var topNavigationBar;
+	var topNavigationBars = document.querySelectorAll("nav.navbar.navbar-inverse.navbar-fixed-top");
+	if (topNavigationBars && topNavigationBars.length > 1) topNavigationBar = topNavigationBars[1];
+	if (!topNavigationBar) return;
+	var navigationElements = topNavigationBar.querySelectorAll("td");
+	if (!navigationElements) return;
+	var totalPointElement;
+	for (var index = 0; index < navigationElements.length; index ++) {
+		if (navigationElements[index].textContent) {
+			if (navigationElements[index].textContent.includes("TOTAL POINTS") && navigationElements[index].querySelector("font[color='white']")) {
+				totalPointElement = navigationElements[index].querySelector("font[color='white']");
+				break;
+			}
+		}
+	}
+	if (!totalPointElement) return;
+	try {
+		totalPointElement.innerHTML = totalPointElement.textContent.substring(totalPointElement.textContent.indexOf("(") + 1, totalPointElement.textContent.indexOf(")"));
+	} catch (e) {
+		console.log(e);
+	}
+}
 
 $(document).ready(function() {
 	injectConfigPage(chrome.runtime.getURL('config.html'));
+
+	// makeTotalPointShorter(); UX적으로 개선필요
 	
 	const mainPageForm = document.querySelector("form[action=MainPage]")
 	if (mainPageForm) {
