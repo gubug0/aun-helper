@@ -307,7 +307,7 @@ function makeLogControls() {
 		keywordText.style = "color: rgb(255, 255, 255);margin: 4px;border-radius: 4px;background: rgb(124 143 52);";
 		keywordText.style.alignSelf = "flex-end";
 		keywordText.onclick = function () {
-			var keywords = prompt("알림을 받을 키워드를 입력하세요 (다중조건은 &로 / 여러개는 , 로 구분) 예시) 탈취&2000만골드수표,탄생&호구국", data.logKeywords);
+			var keywords = prompt("알림을 받을 키워드를 입력하세요 (다중조건은 &로 / 여러개는 , 로 구분) 예시) 불여우님&2000만골드수표,탄생&호구국", data.logKeywords);
 			if (keywords !== undefined && keywords !== null && keywords.length > 0) {
 				chrome.storage.local.set({"logKeywords": keywords}, function() {
 					makeLogControls();
