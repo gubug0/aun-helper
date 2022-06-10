@@ -2,9 +2,7 @@ function makeChatShortcuts() {
     let titleDiv = document.querySelector("div.title.middlebox");
     var chatDocument = document;
     if (!titleDiv) {
-        //console.log("chatHelper : u-chat : " + document.querySelector("u-chat"));
         if (document.querySelector("u-chat")) {
-            //console.log("chatHelper : u-chat iframe : " + document.querySelector("u-chat").querySelector("iframe"));
             if (document.querySelector("u-chat").querySelector("iframe")) {
                 chatDocument = document.querySelector("u-chat").querySelector("iframe").contentWindow.document;
                 titleDiv = chatDocument.querySelector("div.title.middlebox");
@@ -31,7 +29,6 @@ function makeChatShortcuts() {
     }
 
     chrome.storage.local.get(["chatshort1", "chatshort2", "chatkeywords"], function(data) {
-        //console.log("chatHelper : " + data.chatshort1 + "/" + data.chatshort2);
         if (data.chatshort1 === undefined || data.chatshort1 === null) data.chatshort1 = "";
         if (data.chatshort2 === undefined || data.chatshort2 === null) data.chatshort2 = "";
 
@@ -106,9 +103,7 @@ function monitorChatKeywords() {
     let titleDiv = document.querySelector("div.title.middlebox");
     var chatDocument = document;
     if (!titleDiv) {
-        //console.log("chatHelper : u-chat : " + document.querySelector("u-chat"));
         if (document.querySelector("u-chat")) {
-            //console.log("chatHelper : u-chat iframe : " + document.querySelector("u-chat").querySelector("iframe"));
             if (document.querySelector("u-chat").querySelector("iframe")) {
                 chatDocument = document.querySelector("u-chat").querySelector("iframe").contentWindow.document;
                 titleDiv = chatDocument.querySelector("div.title.middlebox");
@@ -137,27 +132,22 @@ function monitorChatKeywords() {
 
     chrome.storage.local.get(["chatkeywords", "alarmSound"], function(data) {
         if (!data.chatkeywords) {
-            console.log("no chat keywords");
             return;
         }
         var chatKeywordList = data.chatkeywords.split(",");
         if (!chatKeywordList || chatKeywordList.length === 0) {
-            console.log("no chat keyword list");
             return;
         }
         for (var index = chatLineDivs.length - 1; index > 0; index --) {
             if (index < chatLineDivs.length - 5) break;
             var chatLineDiv = chatLineDivs[index];
-            //console.log("check : " + chatLineDiv.textContent);
             if (chatLineDiv.classList.contains("helper-checked")) continue;
             chatLineDiv.classList.add("helper-checked");
             var chatOwner = chatLineDiv.querySelector("span.nick");
             var chatContent = chatLineDiv.querySelector("span.chatContent");
             if (chatContent) {
-                console.log("check content : " + chatContent.textContent);
                 for (var keyIndex = 0; keyIndex < chatKeywordList.length; keyIndex ++) {
                     if (!chatKeywordList[keyIndex] || chatKeywordList[keyIndex].length === 0) continue;
-                    //console.log("check keyword : " + chatKeywordList[keyIndex].trim());
                     if (chatContent.textContent.includes(chatKeywordList[keyIndex].trim())) {
                         chrome.storage.local.set({"keywordNotificationTitle": ("에타츠/" + chatOwner.textContent.trim()), "keywordNotificationContent" : chatContent.textContent.trim()}, function() {
                             console.log("chat notification made : " + chatContent.textContent.trim());
@@ -169,23 +159,22 @@ function monitorChatKeywords() {
     })
 }
 
-/*
-
-chrome.notifications.create({
-			type: 'basic',
-			iconUrl: 'logo.png',
-			title: "에타츠 헬퍼",
-			message: '길드의 영토를 넓힐 때입니다.',
-			silent: !!isAlarmSound,
-			priority: 2
-		});
-
-
- */
-
 $(document).ready(function() {
     if (!window.location.pathname.startsWith("/chat/mobile")) {
         return;
+    }
+    if (window.name !== "chatFrame") {
+        return;
+    }
+
+    try {
+        _script = document.createElement('script');
+        _script.setAttribute('src', chrome.runtime.getURL('chatExtender.js'));
+        _script.setAttribute('data-extension-id', chrome.runtime.id);
+        (document.head||document.documentElement).appendChild( _script);
+        _script.parentNode.removeChild( _script);
+    } catch (e) {
+        console.log(e);
     }
 
     setTimeout(makeChatShortcuts, 3000);

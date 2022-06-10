@@ -5,7 +5,8 @@
   "version": "0.2.5",
   "permissions": [
 	"storage",
-	"notifications"
+	"notifications",
+  	"tabs"
   ],
   "host_permissions": [
 	"https://aun.kr/"
@@ -31,8 +32,11 @@
     "matches": ["https://aun.kr/*"],
     "run_at": "document_end"
   }],
+  "externally_connectable": {
+	"matches": ["https://aun.kr/*", "https://uchat.io/*", "https://*.uchat.io/*"]
+  },
   "web_accessible_resources": [{
-	"resources": ["ignoreAlert.js", "injectLogScript.js", "config.html", "config.js", "config.css", "logo.png"],
+	"resources": ["ignoreAlert.js", "chatExtender.js", "injectLogScript.js", "config.html", "config.js", "config.css", "logo.png"],
 	"matches": ["https://aun.kr/*"]
   }]
 }

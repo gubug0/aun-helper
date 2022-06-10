@@ -344,6 +344,121 @@ function injectConfigPage(srcFile) {
 	parentFrameset.insertBefore(frameset, parentFrameset.lastChild)
 }
 
+function sendUserMessage(credential, targetId, message) {
+	if (message.length > 100) message = message.substring(0, 100);
+	var form = document.createElement('form');
+	form.setAttribute('name', 'frmTest');
+	form.setAttribute('method', 'post');
+	form.setAttribute('action', './status.cgi');
+	form.setAttribute('target', 'transFrame');
+	form.setAttribute('accept-charset', 'euc-kr');
+	var inputTarget = document.createElement('input');
+	inputTarget.setAttribute('type', 'text');
+	inputTarget.setAttribute('id', 'player');
+	inputTarget.setAttribute('name', 'player');
+	inputTarget.setAttribute('value', targetId);
+	form.appendChild(inputTarget);
+	var inputMessage = document.createElement('input');
+	inputMessage.setAttribute('type', 'text');
+	inputMessage.setAttribute('id', 'message');
+	inputMessage.setAttribute('name', 'message');
+	inputMessage.setAttribute('value', message);
+	form.appendChild(inputMessage);
+	var inputId = document.createElement('input');
+	inputId.setAttribute('type', 'hidden');
+	inputId.setAttribute('name', 'id');
+	inputId.setAttribute('value', credential.userId);
+	form.appendChild(inputId);
+	var inputPass = document.createElement('input');
+	inputPass.setAttribute('type', 'hidden');
+	inputPass.setAttribute('name', 'pass');
+	inputPass.setAttribute('value', credential.userPass);
+	form.appendChild(inputPass);
+	var inputMode = document.createElement('input');
+	inputMode.setAttribute('type', 'hidden');
+	inputMode.setAttribute('name', 'mode');
+	inputMode.setAttribute('value', 'message_send2');
+	form.appendChild(inputMode);
+	var inputSubmit = document.createElement('input');
+	inputSubmit.setAttribute('type', 'submit');
+	inputSubmit.setAttribute('value', '보내기');
+	form.appendChild(inputSubmit);
+	var iframeObject = document.createElement('iframe');
+	iframeObject.setAttribute('name', 'transFrame');
+	iframeObject.setAttribute('id', 'transFrame');
+	setNonblockFrame(true, function() {
+		try {
+			document.body.appendChild(form);
+			document.body.appendChild(iframeObject);
+			form.submit();
+			setTimeout(function() {
+				document.body.removeChild(form);
+				document.body.removeChild(iframeObject);
+				setNonblockFrame(false);
+			}, 750);
+		} catch (e) {
+			console.log(e);
+		}
+	});
+}
+
+function sendUserGold(credential, targetId, gold) {
+	var form = document.createElement('form');
+	form.setAttribute('name', 'frmTest');
+	form.setAttribute('method', 'post');
+	form.setAttribute('action', './status.cgi');
+	form.setAttribute('target', 'transFrame');
+	form.setAttribute('accept-charset', 'euc-kr');
+	var inputTarget = document.createElement('input');
+	inputTarget.setAttribute('type', 'text');
+	inputTarget.setAttribute('id', 'yid');
+	inputTarget.setAttribute('name', 'yid');
+	inputTarget.setAttribute('value', targetId);
+	form.appendChild(inputTarget);
+	var inputGold = document.createElement('input');
+	inputGold.setAttribute('type', 'text');
+	inputGold.setAttribute('id', 'secNum2');
+	inputGold.setAttribute('name', 'secNum2');
+	inputGold.setAttribute('value', gold.toString());
+	form.appendChild(inputGold);
+	var inputId = document.createElement('input');
+	inputId.setAttribute('type', 'hidden');
+	inputId.setAttribute('name', 'id');
+	inputId.setAttribute('value', credential.userId);
+	form.appendChild(inputId);
+	var inputPass = document.createElement('input');
+	inputPass.setAttribute('type', 'hidden');
+	inputPass.setAttribute('name', 'pass');
+	inputPass.setAttribute('value', credential.userPass);
+	form.appendChild(inputPass);
+	var inputMode = document.createElement('input');
+	inputMode.setAttribute('type', 'hidden');
+	inputMode.setAttribute('name', 'mode');
+	inputMode.setAttribute('value', 'money_send2');
+	form.appendChild(inputMode);
+	var inputSubmit = document.createElement('input');
+	inputSubmit.setAttribute('type', 'submit');
+	inputSubmit.setAttribute('value', '송금');
+	form.appendChild(inputSubmit);
+	var iframeObject = document.createElement('iframe');
+	iframeObject.setAttribute('name', 'transFrame');
+	iframeObject.setAttribute('id', 'transFrame');
+	setNonblockFrame(true, function() {
+		try {
+			document.body.appendChild(form);
+			document.body.appendChild(iframeObject);
+			form.submit();
+			setTimeout(function() {
+				document.body.removeChild(form);
+				document.body.removeChild(iframeObject);
+				setNonblockFrame(false);
+			}, 750);
+		} catch (e) {
+			console.log(e);
+		}
+	});
+}
+
 function makeTotalPointShorter() {
 	var topNavigationBar;
 	var topNavigationBars = document.querySelectorAll("nav.navbar.navbar-inverse.navbar-fixed-top");
@@ -372,6 +487,49 @@ $(document).ready(function() {
 	injectConfigPage(chrome.runtime.getURL('config.html'));
 
 	// makeTotalPointShorter(); UX적으로 개선필요
+	
+	if (document.querySelector("frame[name=mainFrame]")) {
+		chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+			console.log("CHROME onMessage (content.js) : " + request.method);
+			if (request.method === "uchatMessage") {
+				chrome.storage.local.get(["userId", "userPass"], function(data) {
+					if (!data.userId || !data.userPass) {
+						console.log("no user credential");
+						sendResponse({success: false, message: "사용자 정보가 없습니다..!"});
+						return;
+					}
+
+					var credential = {};
+					credential.userId = data.userId;
+					credential.userPass = data.userPass;
+
+					sendUserMessage(credential, request.uchatTargetId, request.uchatValue);
+					console.log("uchat REQUEST : message : " + credential + ":" + request.uchatTargetId + ":" + request.uchatValue);
+					sendResponse({success: false, message: `${request.uchatTargetNick}에게 전보 전송 요청`});
+				});
+				return true;
+			}
+			if (request.method === "uchatGold") {
+				chrome.storage.local.get(["userId", "userPass"], function(data) {
+					if (!data.userId || !data.userPass) {
+						console.log("no user credential");
+						sendResponse({success: false, message: "사용자 정보가 없습니다..!"});
+						return;
+					}
+
+					var credential = {};
+					credential.userId = data.userId;
+					credential.userPass = data.userPass;
+
+					sendUserGold(credential, request.uchatTargetId, request.uchatValue);
+					console.log("uchat REQUEST : gold : " + credential + ":" + request.uchatTargetId + ":" + request.uchatValue);
+					sendResponse({success: false, message: `${request.uchatTargetNick}에게 골드 ${request.uchatValue} 송금 요청`});
+				});
+				return true;
+			}
+		});
+		console.log("CHROME onMessage (content.js) SET");
+	}
 	
 	const mainPageForm = document.querySelector("form[action=MainPage]")
 	if (mainPageForm) {

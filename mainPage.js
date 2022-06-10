@@ -81,7 +81,7 @@ function updateGuildMap() {
 		var currentLocationHolder = document.querySelector("big[data-step='4']");
 		var currentLocation = null;
 		var currentCityName = null;
-		if (!currentLocationHolder) {
+		if (!currentLocationHolder && document.querySelector("frame[name='mainFrame']")) {
 			currentLocationHolder = document.querySelector("frame[name='mainFrame']").contentWindow.document.querySelector("big[data-step='4']");
 		}
 		if (currentLocationHolder) {
@@ -237,7 +237,6 @@ function updateUserCredentials() {
 		}
 	}
 }
-
 
 function addConfirmInnPage() {
 	const innForm = document.querySelector("form[action='./town.cgi?'] input[name='mode'][value='inn']");
