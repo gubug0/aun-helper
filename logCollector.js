@@ -195,6 +195,44 @@ function parseLogMessage(log, logConfig) {
 				});
 		}
 
+		if (logConfig.logKeywords) {
+			var logKeywordList = logConfig.logKeywords.split(",");
+			if (!logKeywordList || logKeywordList.length === 0) {
+				console.log("no log keyword list");
+				return;
+			}
+			currentLog
+				.forEach(item => {
+					for (var keywordIndex = 0; keywordIndex < logKeywordList.length; keywordIndex ++) {
+						var listeningKeyword = logKeywordList[keywordIndex];
+						//console.log("listeningKeyword : " + listeningKeyword);
+						if (!listeningKeyword) {
+							console.log("empty log keyword");
+							continue;
+						}
+						var logItemConditions = listeningKeyword.split("&");
+						if (!logItemConditions || logItemConditions.length === 0) {
+							console.log("no log condition list");
+							continue;
+						}
+						var isMatchEveryConditions = true;
+						for (var conIndex = 0; conIndex < logItemConditions.length; conIndex ++) {
+							var conditionItem = logItemConditions[conIndex];
+							//console.log("conditionItem : " + conditionItem);
+							if ((item.type && !item.type.includes(conditionItem.replaceAll("[","").replaceAll("]", "")))
+								&& !item.message.includes(conditionItem)) {
+								isMatchEveryConditions = false;
+								break;
+							}
+						}
+						if (!isMatchEveryConditions) continue;
+						chrome.storage.local.set({"keywordNotificationTitle": ("에타츠/" + item.type), "keywordNotificationContent" : item.message}, function() {
+							console.log("log notification made : " + item.type + ":" + item.message);
+						});
+					}
+				});
+		}
+
 		if (logItems.length > 0) {
             addMultiLog(logItems);
         }
@@ -230,12 +268,70 @@ function requestGameLog() {
 }
 function sendLogMessage(message) {
 	document.getElementById("dbstatus").innerHTML = message;
+	makeLogControls();
 }
 
 function registerLogRequest() {
 	const worker = create10000msIntervalWorker(function() {
 		requestGameLog();
 	})
+}
+
+function makeLogControls() {
+	let titleDiv = document.querySelector("span#dbstatus td");
+	var logDocument = document;
+	if (!titleDiv) {
+		console.log("logCollector : no log title div");
+		return;
+	}
+	if (!titleDiv.querySelector("img")) {
+		console.log("logCollector : no log title div inner content");
+		return;
+	}
+
+	while (titleDiv.querySelector("div#logkeyword")) {
+		titleDiv.removeChild(titleDiv.querySelector("div#logkeyword"));
+	}
+
+	chrome.storage.local.get(["logKeywords"], function(data) {
+		var imageItem = titleDiv.querySelector("img");
+		var tdItem = titleDiv.querySelector("td");
+		var keywordDiv = logDocument.createElement("div");
+		keywordDiv.id = "logkeyword";
+		keywordDiv.style.display = "flex";
+		keywordDiv.style.justifyContent = "space-between";
+		keywordDiv.style.textAlign = "end";
+		keywordDiv.style.width = "100%";
+		var keywordText =  logDocument.createElement("button");
+		keywordText.innerHTML = "<b>키워드</b>";
+		keywordText.style = "color: rgb(255, 255, 255);margin: 4px;border-radius: 4px;background: rgb(124 143 52);";
+		keywordText.style.alignSelf = "flex-end";
+		keywordText.onclick = function () {
+			var keywords = prompt("알림을 받을 키워드를 입력하세요 (다중조건은 &로 / 여러개는 , 로 구분) 예시) 탈취&2000만골드수표,탄생&호구국", data.logKeywords);
+			if (keywords !== undefined && keywords !== null && keywords.length > 0) {
+				chrome.storage.local.set({"logKeywords": keywords}, function() {
+					makeLogControls();
+				});
+			}
+		};
+		if (titleDiv) {
+			titleDiv.height = "48";
+			titleDiv.removeAttribute("height");
+			titleDiv.setAttribute("height", "48");
+		}
+		if (imageItem) {
+			imageItem.parentElement.removeChild(imageItem);
+			imageItem.style.height = "40px";
+			imageItem.style.margin = "4px";
+			keywordDiv.append(imageItem);
+			var blankDiv = logDocument.createElement("div");
+			blankDiv.style.flex = "1";
+			keywordDiv.append(blankDiv);
+		}
+		keywordDiv.append(keywordText);
+		titleDiv.append(keywordDiv);
+
+	});
 }
 
 $(document).ready(function() {
