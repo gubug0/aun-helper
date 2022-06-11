@@ -451,6 +451,15 @@
 					if (index === 0) continue;
 					var guildDataObject = {};
 					var guildItem = guildList[index];
+					//console.log(guildItem);
+					var guildIndex = -1;
+					try {
+						var guildInfo = guildItem.querySelectorAll("td")[2].textContent;
+						guildIndex = guildInfo.substring(guildInfo.lastIndexOf("코드넘버: ") + 6);
+					} catch (e) {
+						console.log(e);
+					}
+					guildDataObject.guildIndex = guildIndex;
 					var guildRank = guildItem.querySelector("nobr");
 					if (guildRank != null && guildRank.textContent != null && guildRank.textContent.length > 0) {
 						guildDataObject.rank = guildRank.textContent;
@@ -486,16 +495,6 @@
 
 	function setCityRefreshNeed(value, callback) {
 		chrome.storage.local.set({"cityRefresh": value}, callback);
-	}
-
-	function monitorCityUpdateNeeded() {
-		getCityRefreshNeed(function(data) {
-			if (data.cityRefresh) {
-				setCityRefreshNeed(false, function() {
-					updateCityStatus();
-				})
-			}
-		})
 	}
 
 	function updateCityStatus() {
@@ -568,6 +567,15 @@
 	}
 
 	function requestUserServerData() {
+		chrome.storage.local.get(["userId", "userPass"], function(data) {
+			if (!data.userId || !data.userPass) {
+				console.log("no user credential");
+				return;
+			}
+			if (data.userId === "firefox") {
+				if (document.querySelector("#parseUsers")) document.querySelector("#parseUsers").style.display = "";
+			}
+		});
 		try {
 			fetch("https://cabininsnow.com:9032/user?serverKey=AUN-HELPER")
 				.then((response) => response.json())
@@ -757,6 +765,12 @@
 			}
 		});
 	}
+
+	function isNonblockFrame(callback) {
+		chrome.storage.local.get(["isNonblockFrame"], function(data) {
+			callback(data.isNonblockFrame);
+		});
+	}
 	
 	document.querySelector("#activateAuto").addEventListener("click", function() {
 		
@@ -883,7 +897,12 @@
 		}
 	);
 
-	chrome.storage.local.set({"bossParticipant": "-", "bossTitle": "-"});
+	isNonblockFrame(function (isNonblockFrame){
+		if (isNonblockFrame) {
+			return;
+		}
+		chrome.storage.local.set({"bossParticipant": "-", "bossTitle": "-"});
+	})
 	
 	updateAutoBattleLog();
 	updateActiveButton();
@@ -905,7 +924,6 @@
 	setInterval(checkChatNotification, 1000);
 	setInterval(updateGuildStatus, 600000);
 	setInterval(updateCityStatus, 10000);
-	setInterval(monitorCityUpdateNeeded, 1000);
 	setInterval(requestUserServerData, 30000);
 
 	chrome.runtime.onMessageExternal.addListener(function(request, sender, sendResponse) {

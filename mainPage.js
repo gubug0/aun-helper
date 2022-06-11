@@ -112,7 +112,7 @@ function updateGuildMap() {
 		console.log("currentCityName SET " + currentCityName);
 		setLastCity(currentCityName, function() {
 			var worldMapList = document.querySelectorAll("div[class='cuadro_intro_hover']");
-			if (!worldMapList) worldMapList = document.querySelector("frame[name='mainFrame']").contentWindow.document.querySelectorAll("div[class='cuadro_intro_hover']");
+			if (!worldMapList && document.querySelector("frame[name='mainFrame']")) worldMapList = document.querySelector("frame[name='mainFrame']").contentWindow.document.querySelectorAll("div[class='cuadro_intro_hover']");
 			if(!worldMapList) {
 				//console.log("no worldmap found");
 				return;
@@ -136,6 +136,12 @@ function updateGuildMap() {
 					continue;
 				}
 				var mapCityNameSubArea = mapCityNameArea.querySelector("small");
+				var mapCityGuildIndex = 0;
+				try {
+					mapCityGuildIndex = mapCityNameSubArea.textContent.replace(/[^0-9]/g, "");
+				} catch (e) {
+					console.log(e);
+				}
 				if (mapCityNameSubArea) {
 					try {
 						mapCityNameArea.querySelector("nobr").removeChild(mapCityNameSubArea);
@@ -171,7 +177,12 @@ function updateGuildMap() {
 					continue;
 				}
 				if (cityData.guild != null && cityData.guild !== "") {
-					var guildData = getGuildData(data.guildData, cityData.guild);
+					//console.log("finding guild index : " + mapCityGuildIndex);
+					var guildData = getGuildDataByIndex(data.guildData, mapCityGuildIndex);
+					if (!guildData) {
+						guildData = getGuildDataByName(data.guildData, cityData.guild);
+						console.log("guild index not found, search by name");
+					}
 					mapCityItem.style.backgroundColor = "transparent";
 					mapCityBackground.style.maxWidth = "81px";
 					mapCityBackground.style.minWidth = "81px";
@@ -517,7 +528,7 @@ function showAdditionalRank() {
 			if (worldTierTableItemComponents[2].querySelector("small")) worldTierTableItemComponents[2].querySelector("small").innerHTML = data.userData[realIndex].tag;
 			worldTierTableItemComponents[2].querySelector("font a").setAttribute("href", `https://aun.kr/charainfo/${data.userData[realIndex].id}`);
 			worldTierTableItemComponents[2].querySelector("font font").innerHTML = data.userData[realIndex].name;
-			worldTierTableItemComponents[3].querySelector("font").innerHTML = "<small>" + data.userData[realIndex].tier + "</small>";
+			worldTierTableItemComponents[3].querySelector("font").innerHTML = "<small>" + data.userData[realIndex].tier.replace("다이아몬드", "다이아") + "</small>";
 		}
 
 		var todayHuntTableHolder = document.createElement("div");

@@ -182,13 +182,30 @@ function getCityData(cityDataArray, cityName) {
 	return null;
 }
 
-function getGuildData(guildDataArray, guildName) {
+function getGuildDataByName(guildDataArray, guildName) {
 	if (guildDataArray == null) return null;
 	try {
 		for (var index = 0; index < guildDataArray.length; index ++) {
 			var guildDataItem = guildDataArray[index];
 			if (guildDataItem == null || guildDataItem.title == null) continue;
-			if (guildDataItem.title != null && guildDataItem.title.replace("길드","").trim() === guildName.replace("길드","").trim()) {
+			if (guildDataItem.title.replace("길드", "").trim() === guildName.replace("길드", "").trim()) {
+				return guildDataItem;
+			}
+		}
+	} catch (e) {
+		console.log(e);
+		return null;
+	}
+	return null;
+}
+
+function getGuildDataByIndex(guildDataArray, guildIndex) {
+	if (guildDataArray == null) return null;
+	try {
+		for (var index = 0; index < guildDataArray.length; index ++) {
+			var guildDataItem = guildDataArray[index];
+			if (guildDataItem == null || guildDataItem.title == null) continue;
+			if (guildDataItem.guildIndex > 0 && guildDataItem.guildIndex === guildIndex) {
 				return guildDataItem;
 			}
 		}
@@ -517,7 +534,7 @@ $(document).ready(function() {
 
 					sendUserMessage(credential, request.uchatTargetId, request.uchatValue);
 					console.log("uchat REQUEST : message : " + credential + ":" + request.uchatTargetId + ":" + request.uchatValue);
-					sendResponse({success: false, message: `${request.uchatTargetNick}에게 전보 전송 요청`});
+					sendResponse({success: false, message: `${request.uchatTargetNick}에게 전보 전송중`});
 				});
 				return true;
 			}
@@ -535,7 +552,7 @@ $(document).ready(function() {
 
 					sendUserGold(credential, request.uchatTargetId, request.uchatValue);
 					console.log("uchat REQUEST : gold : " + credential + ":" + request.uchatTargetId + ":" + request.uchatValue);
-					sendResponse({success: false, message: `${request.uchatTargetNick}에게 골드 ${request.uchatValue} 송금 요청`});
+					sendResponse({success: false, message: `${request.uchatTargetNick}에게 골드 ${request.uchatValue} 송금중`});
 				});
 				return true;
 			}
