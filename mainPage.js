@@ -195,6 +195,7 @@ function mainPageAction() {
 	makeUserListToggleable();
 	makeInvitePointToggleable();
 	showAbilityPresets();
+	showAdditionalRank();
 	updateGuildMap();
 
 	isAutoBattleActive(function(isActive) {
@@ -469,6 +470,109 @@ function showAbilityPresets() {
 	});
 	buttonsHolder.append(buttonPresetD);
 	presetHolder.prepend(buttonsHolder);
+}
+
+function showAdditionalRank() {
+	getUserServerData(function(data) {
+		if (!data || !data.userData || data.userData.length < 10) {
+			console.log("no user server data");
+			return;
+		}
+
+		var rankTables = document.querySelectorAll("table.offer.offer-radius.table.table-bordered.table-condensed");
+		if (!rankTables || rankTables.length !== 5) {
+			console.log("no rankTables found");
+			return;
+		}
+		var rankTableHolder = rankTables[2].parentElement.parentElement;
+
+		var worldTierTableHolder = document.createElement("div");
+		worldTierTableHolder.classList.add("col-md-4");
+		worldTierTableHolder.style.marginTop = "12px";
+		worldTierTableHolder.innerHTML = rankTables[2].outerHTML;
+		rankTableHolder.append(worldTierTableHolder);
+		worldTierTableHolder = rankTables[2].parentElement;
+		worldTierTableHolder.querySelector("font.esd2 big").innerHTML = "세계최고티어 10인방";
+
+		data.userData.sort(function(a, b) {
+			var aTier = 0;
+			var bTier = 0;
+			try {
+				aTier = a.tier.substring(a.tier.indexOf("(") + 1, a.tier.indexOf(")"));
+				bTier = b.tier.substring(b.tier.indexOf("(") + 1, b.tier.indexOf(")"));
+			} catch (e) {
+
+			}
+			return parseInt(bTier) - parseInt(aTier);
+		});
+
+		var worldTierTableItems = worldTierTableHolder.querySelectorAll("tr");
+		worldTierTableItems[1].querySelectorAll("td")[3].querySelector("font").innerHTML = "티어";
+		for (var index = 0; index < worldTierTableItems.length; index ++) {
+			if (index < 2) continue;
+			var realIndex = index - 2;
+			var worldTierTableItem = worldTierTableItems[index];
+			var worldTierTableItemComponents = worldTierTableItem.querySelectorAll("td");
+			worldTierTableItemComponents[1].querySelector("img").src = data.userData[realIndex].icon;
+			if (worldTierTableItemComponents[2].querySelector("small")) worldTierTableItemComponents[2].querySelector("small").innerHTML = data.userData[realIndex].tag;
+			worldTierTableItemComponents[2].querySelector("font a").setAttribute("href", `https://aun.kr/charainfo/${data.userData[realIndex].id}`);
+			worldTierTableItemComponents[2].querySelector("font font").innerHTML = data.userData[realIndex].name;
+			worldTierTableItemComponents[3].querySelector("font").innerHTML = "<small>" + data.userData[realIndex].tier + "</small>";
+		}
+
+		var todayHuntTableHolder = document.createElement("div");
+		todayHuntTableHolder.classList.add("col-md-4");
+		todayHuntTableHolder.style.marginTop = "12px";
+		todayHuntTableHolder.innerHTML = rankTables[3].outerHTML;
+		rankTableHolder.append(todayHuntTableHolder);
+		todayHuntTableHolder = rankTables[3].parentElement;
+		todayHuntTableHolder.querySelector("font.esd2 big").innerHTML = "금일 경험치 순위";
+
+		data.userData.sort(function(a, b) {
+			return parseInt(b.pointUp.replaceAll("+","")) - parseInt(a.pointUp.replaceAll("+",""));
+		});
+
+		var todayHuntTableItems = todayHuntTableHolder.querySelectorAll("tr");
+		todayHuntTableItems[1].querySelectorAll("td")[3].querySelector("font").innerHTML = "경험치";
+		for (var index = 0; index < todayHuntTableItems.length; index ++) {
+			if (index < 2) continue;
+			var realIndex = index - 2;
+			var todayHuntTableItem = todayHuntTableItems[index];
+			var todayHuntTableItemComponents = todayHuntTableItem.querySelectorAll("td");
+			todayHuntTableItemComponents[1].querySelector("img").src = data.userData[realIndex].icon;
+			if (todayHuntTableItemComponents[2].querySelector("small")) todayHuntTableItemComponents[2].querySelector("small").innerHTML = data.userData[realIndex].tag;
+			todayHuntTableItemComponents[2].querySelector("font a").setAttribute("href", `https://aun.kr/charainfo/${data.userData[realIndex].id}`);
+			todayHuntTableItemComponents[2].querySelector("font font").innerHTML = data.userData[realIndex].name;
+			todayHuntTableItemComponents[3].querySelector("font").innerHTML = data.userData[realIndex].pointUp.replaceAll("+","");
+		}
+
+		var todayGuildTableHolder = document.createElement("div");
+		todayGuildTableHolder.classList.add("col-md-4");
+		todayGuildTableHolder.style.marginTop = "12px";
+		todayGuildTableHolder.innerHTML = rankTables[4].outerHTML;
+		rankTableHolder.append(todayGuildTableHolder);
+		todayGuildTableHolder = rankTables[4].parentElement;
+		todayGuildTableHolder.querySelector("font.esd2 big").innerHTML = "금일 길드전 순위";
+
+		data.userData.sort(function(a, b) {
+			return parseInt(b.guildCount) - parseInt(a.guildCount);
+		});
+
+		var todayGuildTableItems = todayGuildTableHolder.querySelectorAll("tr");
+		todayGuildTableItems[1].querySelectorAll("td")[3].querySelector("font").innerHTML = "길드전";
+		for (var index = 0; index < todayGuildTableItems.length; index ++) {
+			if (index < 2) continue;
+			var realIndex = index - 2;
+			var todayGuildTableItem = todayGuildTableItems[index];
+			var todayGuildTableItemComponents = todayGuildTableItem.querySelectorAll("td");
+			todayGuildTableItemComponents[1].querySelector("img").src = data.userData[realIndex].icon;
+			if (todayGuildTableItemComponents[2].querySelector("small")) todayGuildTableItemComponents[2].querySelector("small").innerHTML = data.userData[realIndex].guildName;
+			todayGuildTableItemComponents[2].querySelector("font a").setAttribute("href", `https://aun.kr/charainfo/${data.userData[realIndex].id}`);
+			todayGuildTableItemComponents[2].querySelector("font font").innerHTML = data.userData[realIndex].name;
+			todayGuildTableItemComponents[3].querySelector("font").innerHTML = data.userData[realIndex].guildCount;
+		}
+		
+	})
 }
 
 $(document).ready(function() {

@@ -97,6 +97,18 @@ function getAbilitySetData(callback) {
 	});
 }
 
+function getUserServerData(callback) {
+	chrome.storage.local.get(["userData"], function(data) {
+		if (data.userData === undefined) {
+			data.userData = [];
+		}
+
+		if (callback) {
+			callback(data);
+		}
+	});
+}
+
 function changeUserAbility(credential, typeName, typeIndex, abilityIndex) {
 	var form = document.createElement('form');
 	form.setAttribute('name', 'frmTest');

@@ -1,4 +1,7 @@
 ﻿(function() {
+	var userData = [];
+	var userAdditionalIds = ["leejung08"];
+
 	function clearBattleCount(callback) {
 		chrome.storage.local.set({"battleCount": 0}, callback);
 	}
@@ -73,6 +76,17 @@
 			}
 		});
 	}
+	function getParseUserConfig(callback) {
+		chrome.storage.local.get(["parseUser"], function(data) {
+			if (data.parseUser === undefined) {
+				data.parseUser = false;
+			}
+
+			if (callback) {
+				callback(data);
+			}
+		});
+	}
 
 	function setInventorySortConfig(value, callback) {
 		chrome.storage.local.set({"inventorySort": value}, callback);
@@ -90,6 +104,9 @@
 		});
 	}
 
+	function setParseUser(value, callback) {
+		chrome.storage.local.set({"parseUser": value}, callback);
+	}
 	function setDarkLog(value, callback) {
 		chrome.storage.local.set({"darkLog": value}, callback);
 	}
@@ -178,6 +195,18 @@
 			} else {
 				darkLogButton.innerHTML = "다크몹X";
 				darkLogButton.classList.add("error");
+			}
+		})
+		getParseUserConfig(function(data) {
+			const parseUserButton = document.querySelector("#parseUsers");
+			if (parseUserButton) {
+				if (data.parseUser) {
+					parseUserButton.innerHTML = "파싱O";
+					parseUserButton.classList.remove("error");
+				} else {
+					parseUserButton.innerHTML = "파싱X";
+					parseUserButton.classList.add("error");
+				}
 			}
 		})
 	}
@@ -537,6 +566,197 @@
 			console.log(e);
 		}
 	}
+
+	function requestUserServerData() {
+		try {
+			fetch("https://cabininsnow.com:9032/user?serverKey=AUN-HELPER")
+				.then((response) => response.json())
+				.then((data) => {
+					try {
+						if (!data || data.length === 0) {
+							console.log("NO SERVER USER DATA");
+							return;
+						}
+						console.log(data);
+						var testingUserId = data[0].id;
+						if (!testingUserId) {
+							console.log("INVAILD SERVER USER DATA");
+							return;
+						}
+						chrome.storage.local.set({"userData": data}, function() {
+
+						});
+					} catch (e) {
+						console.log(e);
+					}
+				});
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	function startWithParsingUserList(callback) {
+		userData = [];
+		const xhr = new XMLHttpRequest();
+		xhr.responseType = "arraybuffer";
+		xhr.onload = function() {
+			const contenttype = xhr.getResponseHeader("content-type");
+			var charset = contenttype.substring(contenttype.indexOf("charset=") + 8);
+			charset = "utf-8";
+			const dataView = new DataView(xhr.response);
+			const decoder = new TextDecoder(charset);
+			var html = decoder.decode(dataView);
+			var parser = new DOMParser();
+			var doc = parser.parseFromString(html, "text/html");
+			var userTable = doc.querySelector("table.table");
+			if (!userTable) {
+				console.log("NO USER TABLE");
+				callback(false);
+				return;
+			}
+			var userItemList = userTable.querySelectorAll("tr[bgcolor='white']");
+			if (!userItemList) {
+				console.log("NO USER TABLE");
+				callback(false);
+				return;
+			}
+			for (var index = 0; index < userItemList.length; index ++) {
+				var userItem = userItemList[index];
+				var userItemParts = userItem.querySelectorAll("td");
+				try {
+					var userName = userItemParts[2].querySelector("a").textContent.trim();
+					var userId = userItemParts[2].querySelector("a").getAttribute("href");
+					userId = userId.substring(userId.lastIndexOf("/") + 1, userId.includes("?") ? userId.lastIndexOf("?") : userId.length);
+					var userPointUp = userItemParts[4].querySelector("i").textContent.trim();
+					if (userPointUp.length === 0 || userPointUp === "") userPointUp = '+0';
+					var userObject = {};
+					userObject.id = userId;
+					userObject.name = userName;
+					userObject.pointUp = userPointUp;
+					userData.push(userObject);
+				} catch (e) {
+					console.log(e);
+				}
+			}
+			for (var index = 0; index < userAdditionalIds.length; index ++) {
+				var userObject = {};
+				userObject.id = userAdditionalIds[index];
+				userObject.name = userAdditionalIds[index];
+				userObject.pointUp = '+0';
+				userData.push(userObject);
+			}
+			callback(true);
+		}
+		xhr.open("GET", "https://aun.kr/rank.php?action=ranking");
+		xhr.send(null);
+	}
+
+	function startParsingIndividualUser(index, callback) {
+		setTimeout(function() {
+			getParseUserConfig(function(data) {
+				if (!data.parseUser) {
+					callback(false);
+					return;
+				}
+				if (userData.length <= index) {
+					callback(true);
+					return;
+				}
+				const xhr = new XMLHttpRequest();
+				xhr.responseType = "arraybuffer";
+				xhr.onload = function() {
+					const contenttype = xhr.getResponseHeader("content-type");
+					var charset = contenttype.substring(contenttype.indexOf("charset=") + 8);
+					charset = "euc-kr";
+					const dataView = new DataView(xhr.response);
+					const decoder = new TextDecoder(charset);
+					var html = decoder.decode(dataView);
+					var parser = new DOMParser();
+					var doc = parser.parseFromString(html, "text/html");
+					try {
+						var titleArea = doc.querySelector("h2");
+						var userTag = "";
+						if (titleArea.querySelector("small") && titleArea.querySelector("small").textContent) userTag = titleArea.querySelector("small").textContent.trim();
+						var userName = titleArea.querySelector("font.esd2").textContent.trim();
+						var guildArea = doc.querySelector("h1.esd2");
+						var guildCount = 0;
+						if (guildArea) {
+							var guildNameText = guildArea.querySelector("b").textContent.trim();
+							var guildCountText = guildArea.querySelector("small small").textContent;
+							guildCount = guildCountText.substring(guildCountText.indexOf(":") + 1, guildCountText.indexOf(",")).replaceAll("회","").trim();
+						}
+						var userIcon = doc.querySelector("img").getAttribute("src");
+						var userTier = "브론즈 (0)";
+						var userKbds = doc.querySelectorAll("kbd");
+						//console.log("userKbds length " + userKbds ? userKbds.length : "NULL");
+						var userKbd;
+						for (var i = 0; i < userKbds.length; i ++) {
+							//console.log("userKbds " + i + " : " + userKbds[i].textContent);
+							if (userKbds[i].textContent.includes("Lv")) userKbd = userKbds[i];
+						}
+						if (userKbd) {
+							//console.log("userKbd Found");
+							var userTierArea = userKbd.parentElement.parentElement.parentElement.parentElement.querySelectorAll("tr")[8];
+							//console.log("userTierArea : " + userTierArea.textContent);
+							if (userTierArea.querySelectorAll("td")[0].textContent.trim() === "티어") {
+								userTier = userTierArea.querySelectorAll("td")[1].textContent.trim();
+							}
+						}
+						userData[index].name = userName;
+						userData[index].tag = userTag;
+						userData[index].guildName = guildNameText ? guildNameText : "";
+						userData[index].guildCount = guildCount;
+						userData[index].icon = userIcon;
+						userData[index].tier = userTier;
+						console.log(JSON.stringify(userData[index]));
+						//addLog(JSON.stringify(userData[index]));
+
+						try {
+							fetch("https://cabininsnow.com:9032/update", {
+								method: "POST",
+								headers: {
+									"Content-Type": "application/json",
+								},
+								body: JSON.stringify({
+									serverKey: "AUN-HELPER",
+									userData: userData[index]
+								}),
+							}).then((response) => {
+							//	console.log(response);
+							//	addLog(JSON.stringify(response));
+							});
+						} catch (e) {
+							console.log(e);
+						}
+					} catch (e) {
+						console.log(e);
+					}
+					startParsingIndividualUser(index + 1, callback);
+				}
+				xhr.open("GET", "https://aun.kr/charainfo/" + userData[index].id);
+				//console.log("REQUESETING " + "https://aun.kr/charainfo/" + userData[index].id);
+				xhr.send(null);
+			})
+		}, 2000);
+	}
+
+	function readyStartParsing() {
+		startWithParsingUserList(function(result) {
+			if (result) {
+				addLog("USER LIST UPDATED : " + userData.length + " USERS");
+				startParsingIndividualUser(0, function(result) {
+					if (result) {
+						addLog("USER DATA UPDATED : " + userData.length + " ITEMS");
+						readyStartParsing();
+					} else {
+						addLog("startParsingIndividualUser FAILED");
+					}
+				})
+			} else {
+				addLog("startWithParsingUserList FAILED");
+			}
+		});
+	}
 	
 	document.querySelector("#activateAuto").addEventListener("click", function() {
 		
@@ -627,6 +847,20 @@
 			})
 		});
 	});
+
+	if (document.querySelector("#parseUsers")) {
+		document.querySelector("#parseUsers").addEventListener("click", function() {
+			getParseUserConfig(function(data) {
+				const parseStatus = !data.parseUser
+				setParseUser(parseStatus, function() {
+					updateEtcButton();
+					if (parseStatus) {
+						readyStartParsing();
+					}
+				})
+			});
+		});
+	}
 	
 	chrome.runtime.onMessage.addListener(
 		function(request, sender, sendResponse) {
@@ -662,6 +896,7 @@
 	updateRefreshedTime();
 	updateGuildStatus();
 	updateCityStatus();
+	requestUserServerData();
 
 	setInterval(updateBattleLog, 3000);
 	setInterval(updateAutoBattleLog, 1000);
@@ -671,6 +906,7 @@
 	setInterval(updateGuildStatus, 600000);
 	setInterval(updateCityStatus, 10000);
 	setInterval(monitorCityUpdateNeeded, 1000);
+	setInterval(requestUserServerData, 30000);
 
 	chrome.runtime.onMessageExternal.addListener(function(request, sender, sendResponse) {
 		console.log("CHROME onMessageExternal (config.js) : " + request.method);
