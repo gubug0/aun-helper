@@ -384,57 +384,59 @@
 
 	function updateGuildStatus() {
 		try {
-			var headers = new Headers();
-			headers.append('Content-Type','text/html; charset=EUC-KR');
-			fetch('https://aun.kr/guild', headers).then((response) => response.text()).then(html => {
-				if (!html.startsWith("<!DOCTYPE")) html = html.substring(html.indexOf("<TABLE"), html.indexOf("</TABLE>") + 8);
-				var parser = new DOMParser();
-				var doc = parser.parseFromString(html, "text/html");
-				var guildList = doc.querySelectorAll("tr");
-				//console.log(guildList);
-				var guildDataArray = [];
-				for (var index = 0; index < guildList.length; index ++) {
-					if (index === 0) continue;
-					var guildDataObject = {};
-					var guildItem = guildList[index];
-					//console.log(guildItem);
-					var guildIndex = -1;
-					try {
-						var guildInfo = guildItem.querySelectorAll("td")[2].textContent;
-						guildIndex = guildInfo.substring(guildInfo.lastIndexOf("코드넘버: ") + 6);
-					} catch (e) {
-						console.log(e);
+			fetch('https://aun.kr/guild')
+				.then((response) => {
+					if (!response.ok) {
+						console.error("Request Failed. status = ", response.status)
+						return null;
 					}
-					guildDataObject.guildIndex = guildIndex;
-					var guildRank = guildItem.querySelector("nobr");
-					if (guildRank != null && guildRank.textContent != null && guildRank.textContent.length > 0) {
-						guildDataObject.rank = guildRank.textContent;
-					} else {
-						guildDataObject.rank = 0;
+					return response.text()
+				})
+				.then((html) => {
+					if (!html) {
+						return;
 					}
-					var guildName = guildItem.querySelector("h3 b");
-					if (guildName != null && guildName.textContent != null && guildName.textContent.length > 0) {
-						guildDataObject.title = guildName.textContent;
-					} else {
-						guildDataObject.title = "";
+					if (!html.startsWith("<!DOCTYPE")) html = html.substring(html.indexOf("<TABLE"), html.indexOf("</TABLE>") + 8);
+					const parser = new DOMParser();
+					const doc = parser.parseFromString(html, "text/html");
+					const guildList = doc.querySelectorAll("tr");
+					const guildDataArray = [];
+					for (var index = 1; index < guildList.length; index ++) {
+						const guildDataObject = {};
+						const guildItem = guildList[index];
+						const columns = guildItem.querySelectorAll("td");
+						if (columns.length < 6) {
+							continue;
+						}
+						
+						const guildIndex = columns[2].textContent.replace(/.*코드넘버: ([0-9]+).*/, "$1");
+						guildDataObject.guildIndex = guildIndex;
+						
+						const guildRank = columns[0].textContent
+						const guildName = columns[2].querySelector("h3 b");
+						if (guildName) {
+							guildDataObject.title = guildName.textContent;
+						} else {
+							guildDataObject.title = "";
+						}
+						
+						const guildImage = columns[1].querySelector("img");
+						if (guildImage && guildImage.src) {
+							guildDataObject.image = guildImage.src;
+						} else {
+							guildDataObject.image = "";
+						}
+						
+						guildDataArray.push(guildDataObject);
 					}
-					var guildImage = guildItem.querySelector("img");
-					if (guildImage != null && guildImage.src != null && guildImage.src.length > 0) {
-						guildDataObject.image = guildImage.src;
-					} else {
-						guildDataObject.image = "";
-					}
-					//console.log(guildDataObject);
-					guildDataArray.push(guildDataObject);
-				}
-				if (guildDataArray.length > 0) {
-					chrome.storage.local.set({"guildData": guildDataArray}, function() {
+					if (guildDataArray.length > 0) {
+						chrome.storage.local.set({"guildData": guildDataArray}, function() {
 
-					});
-				} else {
-					console.log("guildDataArray is Empty")
-				}
-			});
+						});
+					} else {
+						console.log("guildDataArray is Empty")
+					}
+				});
 		} catch (e) {
 			console.log(e);
 		}
@@ -445,61 +447,40 @@
 	}
 
 	function updateCityStatus() {
-		try {
-			const xhr = new XMLHttpRequest();
-			xhr.responseType = "arraybuffer";
-			xhr.onload = function() {
-				const contenttype = xhr.getResponseHeader("content-type");
-				var charset = contenttype.substring(contenttype.indexOf("charset=") + 8);
-				charset = "euc-kr";
-				const dataView = new DataView(xhr.response);
-				const decoder = new TextDecoder(charset);
-				var html = decoder.decode(dataView);
-				if (!html.startsWith("<!DOCTYPE")) html = html.substring(html.indexOf("<TABLE"), html.indexOf("</TABLE>") + 8);
-				var parser = new DOMParser();
-				var doc = parser.parseFromString(html, "text/html");
-				//console.log(doc);
-				var cityList = doc.querySelectorAll("tr");
-				//console.log(cityList);
-				var cityDataArray = [];
-				for (var index = 0; index < cityList.length; index ++) {
-					if (index === 0) continue;
-					var cityDataObject = {};
-					var cityItem = cityList[index];
-					//console.log(cityItem);
-					var cityDetails = cityItem.querySelectorAll("td");
-					if (cityDetails == null || cityDetails.length <= 5) continue;
-					var cityName = cityDetails[0];
-					if (cityName != null && cityName.textContent != null && cityName.textContent.length > 0) {
-						cityDataObject.title = cityName.textContent;
-					} else {
-						cityDataObject.title = "";
-					}
-					var cityOwner = cityDetails[1];
-					if (cityOwner != null && cityOwner.textContent != null && cityOwner.textContent.length > 0) {
-						cityDataObject.owner = cityOwner.textContent;
-					} else {
-						cityDataObject.owner = "";
-					}
-					var cityNation = cityDetails[2];
-					if (cityNation != null && cityNation.textContent != null && cityNation.textContent.length > 0) {
-						cityDataObject.nation = cityNation.textContent;
-					} else {
-						cityDataObject.nation = "";
-					}
-					var cityGuild = cityDetails[3];
-					if (cityGuild != null && cityGuild.textContent != null && cityGuild.textContent.length > 0) {
-						cityDataObject.guild = cityGuild.textContent;
-					} else {
-						cityDataObject.guild = "";
-					}
-					var cityTemp = cityDetails[7];
-					if (cityTemp != null && cityTemp.textContent != null && cityTemp.textContent.length > 0) {
-						cityDataObject.temperature = cityTemp.textContent.replace("℃","").trim();
-					} else {
-						cityDataObject.temperature = 0;
-					}
-					//console.log(cityDataObject);
+		fetch('https://aun.kr/tprint', Headers)
+			.then(response => {
+				if (!response.ok) {
+					console.error("Request Failed. status = ", response.status)
+					return null;
+				}
+				return response.arrayBuffer()
+			})
+			.then(arrayBuffer => {
+				const decoder = new TextDecoder('euc-kr');
+				return decoder.decode(arrayBuffer);
+			})
+			.then(html => {
+				const parser = new DOMParser();
+				const doc = parser.parseFromString(html, "text/html");
+				const cityList = doc.querySelectorAll("tr");
+				const cityDataArray = [];
+				for (var index = 1; index < cityList.length; index ++) {
+					const cityDataObject = {};
+					const cityItem = cityList[index];
+					const cityDetails = cityItem.querySelectorAll("td");
+					if (!cityDetails || cityDetails.length < 8) continue;
+					
+					const cityName = cityDetails[0].textContent;
+					cityDataObject.title = cityName;
+					const cityOwner = cityDetails[1].textContent;
+					cityDataObject.owner = cityOwner;
+					const cityNation = cityDetails[2].textContent;
+					cityDataObject.nation = cityNation;
+					const cityGuild = cityDetails[3].textContent;
+					cityDataObject.guild = cityGuild;
+					const cityTemp = cityDetails[7].textContent;
+					cityDataObject.temperature = cityTemp && cityTemp.replace("℃","").trim();
+					
 					cityDataArray.push(cityDataObject);
 				}
 				if (cityDataArray.length > 0) {
@@ -509,18 +490,12 @@
 				} else {
 					console.log("cityDataArray is Empty")
 				}
-			}
-			xhr.open("GET", "https://aun.kr/tprint");
-			xhr.send(null);
-		} catch (e) {
-			console.log(e);
-		}
+			});
 	}
 	
 	document.querySelector("#activateAuto").addEventListener("click", function() {
-		
 		chrome.storage.local.get(["isAutoBattle"], function(data) {
-			var isActivate = !data.isAutoBattle
+			const isActivate = !data.isAutoBattle
 			clearBattleCount(function() {
 				chrome.storage.local.set({"isAutoBattle": isActivate}, function() {
 					updateActiveButton();
