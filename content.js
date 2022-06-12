@@ -51,13 +51,30 @@ function getCityData(cityDataArray, cityName) {
 	return null;
 }
 
-function getGuildData(guildDataArray, guildName) {
+function getGuildDataByName(guildDataArray, guildName) {
 	if (guildDataArray == null) return null;
 	try {
 		for (var index = 0; index < guildDataArray.length; index ++) {
 			var guildDataItem = guildDataArray[index];
 			if (guildDataItem == null || guildDataItem.title == null) continue;
-			if (guildDataItem.title != null && guildDataItem.title.replace("길드","").trim() === guildName.replace("길드","").trim()) {
+			if (guildDataItem.title.replace("길드", "").trim() === guildName.replace("길드", "").trim()) {
+				return guildDataItem;
+			}
+		}
+	} catch (e) {
+		console.log(e);
+		return null;
+	}
+	return null;
+}
+
+function getGuildDataByIndex(guildDataArray, guildIndex) {
+	if (guildDataArray == null) return null;
+	try {
+		for (var index = 0; index < guildDataArray.length; index ++) {
+			var guildDataItem = guildDataArray[index];
+			if (guildDataItem == null || guildDataItem.title == null) continue;
+			if (guildDataItem.guildIndex > 0 && guildDataItem.guildIndex === guildIndex) {
 				return guildDataItem;
 			}
 		}

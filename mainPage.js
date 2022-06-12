@@ -64,6 +64,12 @@ function findAndAddPurchaseLog(callback) {
     }
 }
 
+function findCurrentCity() {
+	const currentLocationHolder = document.querySelector("big[data-step='4']");
+	const currentLocation = currentLocationHolder && currentLocationHolder.textContent;
+	return currentLocation && currentLocation.replace(/.*현위치≫ .*국 (.*)州.*/, '$1');
+}
+
 function updateGuildMap() {
 	getGuildCityData(function (data) {
 		if (!data.guildMap) {
@@ -78,41 +84,15 @@ function updateGuildMap() {
 			return;
 		}
 
-		var currentLocationHolder = document.querySelector("big[data-step='4']");
-		var currentLocation = null;
-		var currentCityName = null;
-		if (!currentLocationHolder) {
-			currentLocationHolder = document.querySelector("frame[name='mainFrame']").contentWindow.document.querySelector("big[data-step='4']");
-		}
-		if (currentLocationHolder) {
-			currentLocation = currentLocationHolder.querySelector("font[class='esd2']");
-		} else {
-			//console.log("cannot find current location holder");
+		const currentCityName = findCurrentCity();
+		if (!currentCityName) {
 			return;
 		}
-		if (currentLocation == null) {
-			//console.log("cannot find current location holder");
-			return;
-		}
-		if (currentLocation.textContent == null) {
-			//console.log("cannot find current location text");
-			return;
-		}
-		if (currentLocation.textContent.includes(" ") && currentLocation.textContent.includes("州") && currentLocation.textContent.split(" ").length === 2) {
-			currentCityName = currentLocation.textContent.split(" ")[1];
-		} else {
-			//console.log("cannot parse current location text : " + currentLocation.textContent);
-			return;
-		}
-		if (currentCityName == null || currentCityName.length === 0) {
-			//console.log("empty currentCityName");
-			return;
-		}
-
+		
 		console.log("currentCityName SET " + currentCityName);
 		setLastCity(currentCityName, function() {
 			var worldMapList = document.querySelectorAll("div[class='cuadro_intro_hover']");
-			if (!worldMapList) worldMapList = document.querySelector("frame[name='mainFrame']").contentWindow.document.querySelectorAll("div[class='cuadro_intro_hover']");
+			if (!worldMapList && document.querySelector("frame[name='mainFrame']")) worldMapList = document.querySelector("frame[name='mainFrame']").contentWindow.document.querySelectorAll("div[class='cuadro_intro_hover']");
 			if(!worldMapList) {
 				//console.log("no worldmap found");
 				return;
@@ -136,6 +116,12 @@ function updateGuildMap() {
 					continue;
 				}
 				var mapCityNameSubArea = mapCityNameArea.querySelector("small");
+				var mapCityGuildIndex = 0;
+				try {
+					mapCityGuildIndex = mapCityNameSubArea.textContent.replace(/[^0-9]/g, "");
+				} catch (e) {
+					console.log(e);
+				}
 				if (mapCityNameSubArea) {
 					try {
 						mapCityNameArea.querySelector("nobr").removeChild(mapCityNameSubArea);
@@ -171,10 +157,14 @@ function updateGuildMap() {
 					continue;
 				}
 				if (cityData.guild != null && cityData.guild !== "") {
-					var guildData = getGuildData(data.guildData, cityData.guild);
+					//console.log("finding guild index : " + mapCityGuildIndex);
+					var guildData = getGuildDataByIndex(data.guildData, mapCityGuildIndex);
+					if (!guildData) {
+						guildData = getGuildDataByName(data.guildData, cityData.guild);
+						console.log("guild index not found, search by name");
+					}
 					mapCityItem.style.backgroundColor = "transparent";
 					mapCityBackground.style.maxWidth = "81px";
-					mapCityBackground.style.minWidth = "81px";
 					if (guildData != null && guildData.image != null) {
 						mapCityBackground.src = guildData.image;
 					} else {
