@@ -30,6 +30,16 @@ function create1000msTimeoutWorker(action) {
 	return createWebWorker(workercode, action);
 }
 
+function create100000msIntervalWorker(action) {
+	const workercode = () => {
+		setInterval(() => {
+			self.postMessage({ done: "done" });
+		}, 100000);
+	};
+
+	return createWebWorker(workercode, action);
+}
+
 function create10000msIntervalWorker(action) {
 	const workercode = () => {
 	  setInterval(() => {
