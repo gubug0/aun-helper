@@ -222,9 +222,7 @@ function updateUserCredentials() {
 		if (idInput) var idValue = idInput.getAttribute("value");
 		if (passInput) var passValue = passInput.getAttribute("value");
 		if (idValue || passValue) {
-			chrome.storage.local.set({"userId": idValue, "userPass" : passValue}, function() {
-				console.log(`USER CREDENTIAL SAVED : ${idValue} / ${passValue}`);
-			});
+			chrome.storage.local.set({"userId": idValue, "userPass" : passValue});
 		}
 	}
 }

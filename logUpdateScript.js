@@ -1,5 +1,4 @@
-console.log("ttt");
-if (window.location.pathname === "/slog") {
+f (window.location.pathname === "/slog") {
 	
 	chrome.runtime.onMessage.addListener(
 		function(request, sender, sendResponse) {
