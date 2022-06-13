@@ -42,7 +42,10 @@ function makeChatShortcuts() {
         short1DivButton.style = "color: rgb(255, 255, 255);border-radius: 4px 0 0 4px;background: rgb(100, 100, 147);padding-right: 3px;border-right-width: 1px;border-right-color: #b7b7db;border-right-style: dashed;";
         short1DivButton.onclick = function () {
             var inputDiv = chatDocument.querySelector("div.chatInput");
-            if (inputDiv) inputDiv.innerHTML = data.chatshort1;
+            if (inputDiv) {
+				inputDiv.innerHTML = data.chatshort1;
+				inputDiv.focus();
+			}
         };
         short1Div.append(short1DivButton);
         var short1DivSetting = chatDocument.createElement("button");
@@ -66,7 +69,10 @@ function makeChatShortcuts() {
         short2DivText.style = "color: rgb(255, 255, 255);margin-left: 3px;border-radius: 4px 0 0 4px;background: rgb(100, 100, 147);padding-right: 3px;border-right-width: 1px;border-right-color: #b7b7db;border-right-style: dashed;";
         short2DivText.onclick = function () {
             var inputDiv = chatDocument.querySelector("div.chatInput");
-            if (inputDiv) inputDiv.innerHTML = data.chatshort2;
+            if (inputDiv) {
+				inputDiv.innerHTML = data.chatshort2;
+				inputDiv.focus();
+			}
         };
         short2Div.append(short2DivText);
         var short2DivSetting = chatDocument.createElement("button");
