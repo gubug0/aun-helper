@@ -13,6 +13,18 @@ function isAutoBattleActive(callback) {
 	});
 }
 
+function getLoggingConfig(callback) {
+	chrome.storage.local.get(["logKeywords"], function(data) {
+		if (data.logKeywords === undefined) {
+			data.logKeywords = "";
+		}
+
+		if (callback) {
+			callback(data);
+		}
+	});
+}
+
 function getGuildCityData(callback) {
 	chrome.storage.local.get(["guildMap", "lastCity", "guildData", "cityData"], function(data) {
 		if (data.guildMap === undefined) {
