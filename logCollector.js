@@ -100,17 +100,17 @@ function parseLogMessage(log, logConfig) {
 			currentLog
 				.forEach(item => {
 					for (var keywordIndex = 0; keywordIndex < logKeywordList.length; keywordIndex ++) {
-						var listeningKeyword = logKeywordList[keywordIndex];
+						const listeningKeyword = logKeywordList[keywordIndex];
 						if (!listeningKeyword) {
 							continue;
 						}
-						var logItemConditions = listeningKeyword.split("&");
+						const logItemConditions = listeningKeyword.split("&");
 						if (!logItemConditions || logItemConditions.length === 0) {
 							continue;
 						}
 						var isMatchEveryConditions = true;
 						for (var conIndex = 0; conIndex < logItemConditions.length; conIndex ++) {
-							var conditionItem = logItemConditions[conIndex];
+							const conditionItem = logItemConditions[conIndex];
 							if ((item.type && !item.type.includes(conditionItem.replaceAll("[","").replaceAll("]", "")))
 								&& !item.message.includes(conditionItem)) {
 								isMatchEveryConditions = false;
@@ -170,8 +170,8 @@ function registerLogRequest() {
 }
 
 function makeLogControls() {
-	let titleDiv = document.querySelector("span#dbstatus td");
-	var logDocument = document;
+	const titleDiv = document.querySelector("span#dbstatus td");
+	const logDocument = document;
 	if (!titleDiv) {
 		console.log("logCollector : no log title div");
 		return;
@@ -186,19 +186,19 @@ function makeLogControls() {
 	}
 
 	chrome.storage.local.get(["logKeywords"], function(data) {
-		var imageItem = titleDiv.querySelector("img");
-		var keywordDiv = logDocument.createElement("div");
+		const imageItem = titleDiv.querySelector("img");
+		const keywordDiv = logDocument.createElement("div");
 		keywordDiv.id = "logkeyword";
 		keywordDiv.style.display = "flex";
 		keywordDiv.style.justifyContent = "space-between";
 		keywordDiv.style.textAlign = "end";
 		keywordDiv.style.width = "100%";
-		var keywordText =  logDocument.createElement("button");
+		const keywordText =  logDocument.createElement("button");
 		keywordText.innerHTML = "<b>키워드</b>";
 		keywordText.style = "color: rgb(255, 255, 255);margin: 4px;border-radius: 4px;background: rgb(124 143 52);";
 		keywordText.style.alignSelf = "flex-end";
 		keywordText.onclick = function () {
-			var keywords = prompt("알림을 받을 키워드를 입력하세요 (다중조건은 &로 / 여러개는 , 로 구분) 예시) 탈취&2000만골드수표,불여우(firefox)님에게 전보를 보냈습니다", data.logKeywords);
+			const keywords = prompt("알림을 받을 키워드를 입력하세요 (다중조건은 &로 / 여러개는 , 로 구분) 예시) 불여우님&2000만골드수표,불여우(firefox)님에게 전보를 보냈습니다", data.logKeywords);
 			if (keywords !== undefined && keywords !== null) {
 				chrome.storage.local.set({"logKeywords": keywords}, function() {
 					makeLogControls();
@@ -215,7 +215,7 @@ function makeLogControls() {
 			imageItem.style.height = "40px";
 			imageItem.style.margin = "4px";
 			keywordDiv.append(imageItem);
-			var blankDiv = logDocument.createElement("div");
+			const blankDiv = logDocument.createElement("div");
 			blankDiv.style.flex = "1";
 			keywordDiv.append(blankDiv);
 		}
