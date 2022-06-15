@@ -492,6 +492,12 @@
 				}
 			});
 	}
+
+	function isBackgroundFrame(callback) {
+		chrome.storage.local.get(["isBackgroundFrame"], function(data) {
+			callback(data.isBackgroundFrame);
+		});
+	}
 	
 	document.querySelector("#activateAuto").addEventListener("click", function() {
 		chrome.storage.local.get(["isAutoBattle"], function(data) {
@@ -614,4 +620,31 @@
 	setInterval(checkChatNotification, 1000);
 	setInterval(updateGuildStatus, 600000);
 	setInterval(updateCityStatus, 10000);
+
+	/*
+	chrome.runtime.onMessageExternal.addListener(function(request, sender, sendResponse) {
+		console.log("CHROME onMessageExternal (config.js) : " + request.method);
+		if (request.method === "uchatMessage") {
+			chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+				console.log("CHROME onMessageExternal PASSED uchatMessage (config.js) : " + request);
+				chrome.tabs.sendMessage(tabs[0].id, request, function(response) {
+					sendResponse(response);
+					console.log("CHROME onMessageExternal PASSED uchatMessage (config.js) : RESPONSE" + response.message);
+				});
+			});
+			return true;
+		}
+		if (request.method === "uchatGold") {
+			chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+				console.log("CHROME onMessageExternal PASSED uchatGold (config.js) : " + request);
+				chrome.tabs.sendMessage(tabs[0].id, request, function(response) {
+					sendResponse(response);
+					console.log("CHROME onMessageExternal PASSED uchatGold (config.js) : RESPONSE" + response.message);
+				});
+			});
+			return true;
+		}
+	});
+	 */
+
 })();
