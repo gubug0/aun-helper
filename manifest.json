@@ -20,6 +20,7 @@
 		"battlePage.js",
 		"purcharseCenter.js", 
 		"stateUpCenter.js", 
+		"status.js",
 		"header.js",
 		"guildwar.js",
 		"chatHelper.js",
