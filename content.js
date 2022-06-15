@@ -13,6 +13,16 @@ function isAutoBattleActive(callback) {
 	});
 }
 
+function isBackgroundFrame(callback) {
+	chrome.storage.local.get(["isBackgroundFrame"], function(data) {
+		callback(data.isBackgroundFrame);
+	});
+}
+
+function setBackgroundFrame(value, callback) {
+	chrome.storage.local.set({"isBackgroundFrame": value}, callback);
+}
+
 function getGuildCityData(callback) {
 	chrome.storage.local.get(["guildMap", "lastCity", "guildData", "cityData"], function(data) {
 		if (data.guildMap === undefined) {
@@ -159,6 +169,115 @@ function getInventorySortConfig(callback) {
 
 function setInventoryFavoriteConfig(value, callback) {
 	chrome.storage.local.set({"inventoryFavorite": value}, callback);
+}
+
+function getAbilitySetData(callback) {
+	chrome.storage.local.get(["userId", "userPass", "abilitySetA", "abilitySetB", "abilitySetC", "abilitySetD"], function(data) {
+		if (data.abilitySetA === undefined) {
+			data.abilitySetA = {};
+		}
+		if (data.abilitySetA.mainAbilityName === undefined) {
+			data.abilitySetA.mainAbilityIndex = "-1";
+			data.abilitySetA.mainAbilityName = "없음";
+		}
+		if (data.abilitySetA.classAbilityName === undefined) {
+			data.abilitySetA.classAbilityIndex = "-1";
+			data.abilitySetA.classAbilityName = "없음";
+		}
+		if (data.abilitySetB === undefined) {
+			data.abilitySetB = {};
+		}
+		if (data.abilitySetB.mainAbilityName === undefined) {
+			data.abilitySetB.mainAbilityIndex = "-1";
+			data.abilitySetB.mainAbilityName = "없음";
+		}
+		if (data.abilitySetB.classAbilityName === undefined) {
+			data.abilitySetB.classAbilityIndex = "-1";
+			data.abilitySetB.classAbilityName = "없음";
+		}
+		if (data.abilitySetC === undefined) {
+			data.abilitySetC = {};
+		}
+		if (data.abilitySetC.mainAbilityName === undefined) {
+			data.abilitySetC.mainAbilityIndex = "-1";
+			data.abilitySetC.mainAbilityName = "없음";
+		}
+		if (data.abilitySetC.classAbilityName === undefined) {
+			data.abilitySetC.classAbilityIndex = "-1";
+			data.abilitySetC.classAbilityName = "없음";
+		}
+		if (data.abilitySetD === undefined) {
+			data.abilitySetD = {};
+		}
+		if (data.abilitySetD.mainAbilityName === undefined) {
+			data.abilitySetD.mainAbilityIndex = "-1";
+			data.abilitySetD.mainAbilityName = "없음";
+		}
+		if (data.abilitySetD.classAbilityName === undefined) {
+			data.abilitySetD.classAbilityIndex = "-1";
+			data.abilitySetD.classAbilityName = "없음";
+		}
+
+		if (callback) {
+			callback(data);
+		}
+	});
+}
+
+function changeUserAbility(credential, typeName, typeIndex, abilityIndex) {
+	const form = document.createElement('form');
+	form.setAttribute('name', 'frmTest');
+	form.setAttribute('method', 'post');
+	form.setAttribute('action', './status.cgi');
+	form.setAttribute('target', 'transFrame');
+	form.setAttribute('accept-charset', 'euc-kr');
+	const inputIndex = document.createElement('input');
+	inputIndex.setAttribute('type', 'radio');
+	inputIndex.setAttribute('id', typeName);
+	inputIndex.setAttribute('name', typeName);
+	inputIndex.setAttribute('value', abilityIndex);
+	inputIndex.setAttribute('checked', 'true');
+	form.appendChild(inputIndex);
+	const inputId = document.createElement('input');
+	inputId.setAttribute('type', 'hidden');
+	inputId.setAttribute('name', 'id');
+	inputId.setAttribute('value', credential.userId);
+	form.appendChild(inputId);
+	const inputPass = document.createElement('input');
+	inputPass.setAttribute('type', 'hidden');
+	inputPass.setAttribute('name', 'pass');
+	inputPass.setAttribute('value', credential.userPass);
+	form.appendChild(inputPass);
+	const inputMode = document.createElement('input');
+	inputMode.setAttribute('type', 'hidden');
+	inputMode.setAttribute('name', 'mode');
+	inputMode.setAttribute('value', 'sk_set2');
+	form.appendChild(inputMode);
+	const inputType = document.createElement('input');
+	inputType.setAttribute('type', 'hidden');
+	inputType.setAttribute('name', 'type');
+	inputType.setAttribute('value', typeIndex);
+	form.appendChild(inputType);
+	const inputSubmit = document.createElement('input');
+	inputSubmit.setAttribute('type', 'submit');
+	form.appendChild(inputSubmit);
+	const iframeObject = document.createElement('iframe');
+	iframeObject.setAttribute('name', 'transFrame');
+	iframeObject.setAttribute('id', 'transFrame');
+	setBackgroundFrame(true, function() {
+		try {
+			document.body.appendChild(form);
+			document.body.appendChild(iframeObject);
+			form.submit();
+			setTimeout(function() {
+				document.body.removeChild(form);
+				document.body.removeChild(iframeObject);
+				setBackgroundFrame(false);
+			}, 750);
+		} catch (e) {
+			console.log(e);
+		}
+	});
 }
 
 function addLog(str, callback) {

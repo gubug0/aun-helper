@@ -180,8 +180,10 @@ function mainPageAction() {
 	if (window.location.pathname !== "/MainPage" && window.location.pathname !== "/top.cgi") {
 		return;
 	}
+	updateUserCredentials();
 	addConfirmInnPage();
 	makeUserListToggleable();
+	showAbilityPresets();
 	updateGuildMap();
 
 	isAutoBattleActive(function(isActive) {
@@ -258,6 +260,112 @@ function makeUserListToggleable() {
 	detailDiv.innerHTML = connectorChild;
 	detailDiv.prepend(summary);
 	connectorDiv.prepend(detailDiv);
+}
+
+function updateUserCredentials() {
+	const mainForm = document.querySelector("form[action='MainPage']");
+	if (mainForm) {
+		const idInput = mainForm.querySelector("input[name='id']");
+		const passInput = mainForm.querySelector("input[name='pass']");
+		if (idInput) var idValue = idInput.getAttribute("value");
+		if (passInput) var passValue = passInput.getAttribute("value");
+		if (idValue || passValue) {
+			chrome.storage.local.set({"userId": idValue, "userPass" : passValue}, function() {
+				console.log(`USER CREDENTIAL SAVED : ${idValue} / ${passValue}`);
+			});
+		}
+	}
+}
+
+function showAbilityPresets() {
+	const presetHolder = document.querySelector("div[role='mnpanel']");
+	if (!presetHolder) return;
+	const buttonsHolder = document.createElement("div");
+	buttonsHolder.style.textAlign = "center";
+	buttonsHolder.style.display = "inline-block";
+	buttonsHolder.style.width = "100%";
+	const buttonPresetA = document.createElement("button");
+	buttonPresetA.classList.add("btn");
+	buttonPresetA.classList.add("btn-info");
+	buttonPresetA.classList.add("btn-xs");
+	buttonPresetA.style.marginLeft = "4px";
+	buttonPresetA.style.marginRight = "4px";
+	buttonPresetA.innerHTML = "사냥어빌";
+	buttonPresetA.addEventListener("click", function () {
+		getAbilitySetData(function(data) {
+			readyChangeUserAbility(data, data.abilitySetA);
+		});
+	});
+	buttonsHolder.append(buttonPresetA);
+	const buttonPresetB = document.createElement("button");
+	buttonPresetB.classList.add("btn");
+	buttonPresetB.classList.add("btn-info");
+	buttonPresetB.classList.add("btn-xs");
+	buttonPresetB.style.marginLeft = "4px";
+	buttonPresetB.style.marginRight = "4px";
+	buttonPresetB.innerHTML = "보스어빌";
+	buttonPresetB.addEventListener("click", function () {
+		getAbilitySetData(function(data) {
+			readyChangeUserAbility(data, data.abilitySetB);
+		});
+	});
+	buttonsHolder.append(buttonPresetB);
+	const buttonPresetC = document.createElement("button");
+	buttonPresetC.classList.add("btn");
+	buttonPresetC.classList.add("btn-info");
+	buttonPresetC.classList.add("btn-xs");
+	buttonPresetC.style.marginLeft = "4px";
+	buttonPresetC.style.marginRight = "4px";
+	buttonPresetC.innerHTML = "대인어빌";
+	buttonPresetC.addEventListener("click", function () {
+		getAbilitySetData(function(data) {
+			readyChangeUserAbility(data, data.abilitySetC);
+		});
+	});
+	buttonsHolder.append(buttonPresetC);
+	const buttonPresetD = document.createElement("button");
+	buttonPresetD.classList.add("btn");
+	buttonPresetD.classList.add("btn-info");
+	buttonPresetD.classList.add("btn-xs");
+	buttonPresetD.style.marginLeft = "4px";
+	buttonPresetD.style.marginRight = "4px";
+	buttonPresetD.innerHTML = "연금어빌";
+	buttonPresetD.addEventListener("click", function () {
+		getAbilitySetData(function(data) {
+			readyChangeUserAbility(data, data.abilitySetD);
+		});
+	});
+	buttonsHolder.append(buttonPresetD);
+	presetHolder.prepend(buttonsHolder);
+}
+
+function readyChangeUserAbility(data, abilitySet) {
+	if (!data.userId || !data.userPass) {
+		console.error("no user credential");
+		alert("사용자 데이터가 없어요..!");
+		return;
+	}
+	if (!abilitySet || (abilitySet.mainAbilityIndex === "-1" && abilitySet.classAbilityIndex === "-1")) {
+		console.log("no abilitySet");
+		alert("저장된 어빌리티가 없어요! 어빌리티변경 메뉴에서 설정해주세요");
+		return;
+	}
+	const credential = {};
+	credential.userId = data.userId;
+	credential.userPass = data.userPass;
+
+	setTimeout(function () {
+		if (abilitySet.mainAbilityIndex > 0) {
+			changeUserAbility(credential, "skill", "1", abilitySet.mainAbilityIndex.toString());
+			alert(`메인어빌리티를 ${abilitySet.mainAbilityName} (으)로 변경합니다.`);
+			setTimeout(function() {
+				if (abilitySet.classAbilityIndex > 0) {
+					changeUserAbility(credential, "skill2", "2", abilitySet.classAbilityIndex.toString());
+					alert(`클래스어빌리티를 ${abilitySet.classAbilityName} (으)로 변경합니다.`);
+				}
+			}, 1500);
+		}
+	}, 100);
 }
 
 $(document).ready(function() {
