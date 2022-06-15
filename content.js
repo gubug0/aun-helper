@@ -13,6 +13,24 @@ function isAutoBattleActive(callback) {
 	});
 }
 
+function isBackgroundFrame(callback) {
+	chrome.storage.local.get(["isBackgroundFrame"], function(data) {
+		callback(data.isBackgroundFrame);
+	});
+}
+
+function setBackgroundFrame(value, callback) {
+	chrome.storage.local.set({"isBackgroundFrame": value}, callback);
+}
+
+function sendUserMessage(credential, targetId, message) {
+
+}
+
+function sendUserGold(credential, targetId, gold) {
+
+}
+
 function getGuildCityData(callback) {
 	chrome.storage.local.get(["guildMap", "lastCity", "guildData", "cityData"], function(data) {
 		if (data.guildMap === undefined) {
@@ -227,7 +245,55 @@ function injectConfigPage(srcFile) {
 
 
 $(document).ready(function() {
-	injectConfigPage(chrome.runtime.getURL('config.html'));
+	isBackgroundFrame(function(isBackgroundFrame) {
+		if (isBackgroundFrame) return;
+		injectConfigPage(chrome.runtime.getURL('config.html'));
+	})
+
+	/*
+	if (document.querySelector("frame[name=mainFrame]")) {
+		chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+			console.log("CHROME onMessage (content.js) : " + request.method);
+			if (request.method === "uchatMessage") {
+				chrome.storage.local.get(["userId", "userPass"], function(data) {
+					if (!data.userId || !data.userPass) {
+						console.log("no user credential");
+						sendResponse({success: false, message: "사용자 정보가 없습니다..!"});
+						return;
+					}
+
+					var credential = {};
+					credential.userId = data.userId;
+					credential.userPass = data.userPass;
+
+					sendUserMessage(credential, request.uchatTargetId, request.uchatValue);
+					console.log("uchat REQUEST : message : " + credential + ":" + request.uchatTargetId + ":" + request.uchatValue);
+					sendResponse({success: false, message: `${request.uchatTargetNick}에게 전보 전송중`});
+				});
+				return true;
+			}
+			if (request.method === "uchatGold") {
+				chrome.storage.local.get(["userId", "userPass"], function(data) {
+					if (!data.userId || !data.userPass) {
+						console.log("no user credential");
+						sendResponse({success: false, message: "사용자 정보가 없습니다..!"});
+						return;
+					}
+
+					var credential = {};
+					credential.userId = data.userId;
+					credential.userPass = data.userPass;
+
+					sendUserGold(credential, request.uchatTargetId, request.uchatValue);
+					console.log("uchat REQUEST : gold : " + credential + ":" + request.uchatTargetId + ":" + request.uchatValue);
+					sendResponse({success: false, message: `${request.uchatTargetNick}에게 골드 ${request.uchatValue} 송금중`});
+				});
+				return true;
+			}
+		});
+		console.log("CHROME onMessage (content.js) SET");
+	}
+	 */
 	
 	const mainPageForm = document.querySelector("form[action=MainPage]")
 	if (mainPageForm) {

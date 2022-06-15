@@ -1,10 +1,8 @@
 function makeChatShortcuts() {
-    let titleDiv = document.querySelector("div.title.middlebox");
+    var titleDiv = document.querySelector("div.title.middlebox");
     var chatDocument = document;
     if (!titleDiv) {
-        //console.log("chatHelper : u-chat : " + document.querySelector("u-chat"));
         if (document.querySelector("u-chat")) {
-            //console.log("chatHelper : u-chat iframe : " + document.querySelector("u-chat").querySelector("iframe"));
             if (document.querySelector("u-chat").querySelector("iframe")) {
                 chatDocument = document.querySelector("u-chat").querySelector("iframe").contentWindow.document;
                 titleDiv = chatDocument.querySelector("div.title.middlebox");
@@ -12,11 +10,11 @@ function makeChatShortcuts() {
         }
     }
     if (!titleDiv) {
-        console.log("chatHelper : no chat title div");
+        console.error("chatHelper : no chat title div");
         return;
     }
     if (!titleDiv.querySelectorAll("div")) {
-        console.log("chatHelper : no chat title div inner content");
+        console.error("chatHelper : no chat title div inner content");
         return;
     }
 
@@ -31,13 +29,12 @@ function makeChatShortcuts() {
     }
 
     chrome.storage.local.get(["chatshort1", "chatshort2", "chatkeywords"], function(data) {
-        //console.log("chatHelper : " + data.chatshort1 + "/" + data.chatshort2);
         if (data.chatshort1 === undefined || data.chatshort1 === null) data.chatshort1 = "";
         if (data.chatshort2 === undefined || data.chatshort2 === null) data.chatshort2 = "";
 
-        var short1Div = chatDocument.createElement("div");
+        const short1Div = chatDocument.createElement("div");
         short1Div.id = "chatshort1";
-        var short1DivButton = chatDocument.createElement("button");
+        const short1DivButton = chatDocument.createElement("button");
         short1DivButton.innerHTML = "<b>단축1</b>";
         short1DivButton.style = "color: rgb(255, 255, 255);border-radius: 4px 0 0 4px;background: rgb(100, 100, 147);padding-right: 3px;border-right-width: 1px;border-right-color: #b7b7db;border-right-style: dashed;";
         short1DivButton.onclick = function () {
@@ -48,7 +45,7 @@ function makeChatShortcuts() {
 			}
         };
         short1Div.append(short1DivButton);
-        var short1DivSetting = chatDocument.createElement("button");
+        const short1DivSetting = chatDocument.createElement("button");
         short1DivSetting.innerHTML = "설정";
         short1DivSetting.style = "color: rgb(255, 255, 255);border-color: white;border-radius: 0 4px 4px 0;background: rgb(100, 100, 147);margin-left: 0;padding-left: 3px;";
         short1DivSetting.onclick = function () {
@@ -62,9 +59,9 @@ function makeChatShortcuts() {
         short1Div.append(short1DivSetting);
         titleDiv.append(short1Div);
 
-        var short2Div = chatDocument.createElement("div");
+        const short2Div = chatDocument.createElement("div");
         short2Div.id = "chatshort2";
-        var short2DivText = chatDocument.createElement("button");
+        const short2DivText = chatDocument.createElement("button");
         short2DivText.innerHTML = "<b>단축2<b/>";
         short2DivText.style = "color: rgb(255, 255, 255);margin-left: 3px;border-radius: 4px 0 0 4px;background: rgb(100, 100, 147);padding-right: 3px;border-right-width: 1px;border-right-color: #b7b7db;border-right-style: dashed;";
         short2DivText.onclick = function () {
@@ -75,7 +72,7 @@ function makeChatShortcuts() {
 			}
         };
         short2Div.append(short2DivText);
-        var short2DivSetting = chatDocument.createElement("button");
+        const short2DivSetting = chatDocument.createElement("button");
         short2DivSetting.innerHTML = "설정";
         short2DivSetting.style = "color: rgb(255, 255, 255);border-color: white;border-radius: 0 4px 4px 0;background: rgb(100, 100, 147);margin-left: 0;padding-left: 3px;";
         short2DivSetting.onclick = function () {
@@ -89,9 +86,9 @@ function makeChatShortcuts() {
         short2Div.append(short2DivSetting);
         titleDiv.append(short2Div);
 
-        var keywordDiv = chatDocument.createElement("div");
+        const keywordDiv = chatDocument.createElement("div");
         keywordDiv.id = "chatkeyword";
-        var keywordText =  chatDocument.createElement("button");
+        const keywordText =  chatDocument.createElement("button");
         keywordText.innerHTML = "<b>키워드</b>";
         keywordText.style = "color: rgb(255, 255, 255);margin-left: 3px;border-radius: 4px;background: rgb(100, 100, 147);";
         keywordText.onclick = function () {
@@ -109,12 +106,10 @@ function makeChatShortcuts() {
 }
 
 function monitorChatKeywords() {
-    let titleDiv = document.querySelector("div.title.middlebox");
+    var titleDiv = document.querySelector("div.title.middlebox");
     var chatDocument = document;
     if (!titleDiv) {
-        //console.log("chatHelper : u-chat : " + document.querySelector("u-chat"));
         if (document.querySelector("u-chat")) {
-            //console.log("chatHelper : u-chat iframe : " + document.querySelector("u-chat").querySelector("iframe"));
             if (document.querySelector("u-chat").querySelector("iframe")) {
                 chatDocument = document.querySelector("u-chat").querySelector("iframe").contentWindow.document;
                 titleDiv = chatDocument.querySelector("div.title.middlebox");
@@ -122,48 +117,40 @@ function monitorChatKeywords() {
         }
     }
     if (!titleDiv) {
-        console.log("chatHelper : no chat title div");
+        console.error("chatHelper : no chat title div");
         return;
     }
     if (!titleDiv.querySelectorAll("div")) {
-        console.log("chatHelper : no chat title div inner content");
+        console.error("chatHelper : no chat title div inner content");
         return;
     }
 
-    var chatDiv = chatDocument.querySelector("div.content.nano-content");
+    const chatDiv = chatDocument.querySelector("div.content.nano-content");
     if (!chatDiv) {
-        console.log("no chatDiv");
+        console.error("no chatDiv");
         return;
     }
-    var chatLineDivs = chatDiv.querySelectorAll("div.line:not(.myLine)")
+    const chatLineDivs = chatDiv.querySelectorAll("div.line:not(.myLine)")
     if (!chatLineDivs) {
-        console.log("no chatLineDivs");
+        console.error("no chatLineDivs");
         return;
     }
 
     chrome.storage.local.get(["chatkeywords", "alarmSound"], function(data) {
-        if (!data.chatkeywords) {
-            console.log("no chat keywords");
-            return;
-        }
+        if (!data.chatkeywords) return;
         var chatKeywordList = data.chatkeywords.split(",");
-        if (!chatKeywordList || chatKeywordList.length === 0) {
-            console.log("no chat keyword list");
-            return;
-        }
+        if (!chatKeywordList || chatKeywordList.length === 0) return;
         for (var index = chatLineDivs.length - 1; index > 0; index --) {
             if (index < chatLineDivs.length - 5) break;
             var chatLineDiv = chatLineDivs[index];
-            //console.log("check : " + chatLineDiv.textContent);
             if (chatLineDiv.classList.contains("helper-checked")) continue;
             chatLineDiv.classList.add("helper-checked");
-            var chatOwner = chatLineDiv.querySelector("span.nick");
-            var chatContent = chatLineDiv.querySelector("span.chatContent");
+            const chatOwner = chatLineDiv.querySelector("span.nick");
+            const chatContent = chatLineDiv.querySelector("span.chatContent");
             if (chatContent) {
                 console.log("check content : " + chatContent.textContent);
                 for (var keyIndex = 0; keyIndex < chatKeywordList.length; keyIndex ++) {
                     if (!chatKeywordList[keyIndex] || chatKeywordList[keyIndex].length === 0) continue;
-                    //console.log("check keyword : " + chatKeywordList[keyIndex].trim());
                     if (chatContent.textContent.includes(chatKeywordList[keyIndex].trim())) {
                         chrome.storage.local.set({"keywordNotificationTitle": ("에타츠/" + chatOwner.textContent.trim()), "keywordNotificationContent" : chatContent.textContent.trim()}, function() {
                             console.log("chat notification made : " + chatContent.textContent.trim());
@@ -175,23 +162,22 @@ function monitorChatKeywords() {
     })
 }
 
-/*
-
-chrome.notifications.create({
-			type: 'basic',
-			iconUrl: 'logo.png',
-			title: "에타츠 헬퍼",
-			message: '길드의 영토를 넓힐 때입니다.',
-			silent: !!isAlarmSound,
-			priority: 2
-		});
-
-
- */
-
 $(document).ready(function() {
     if (!window.location.pathname.startsWith("/chat/mobile")) {
         return;
+    }
+    if (window.name !== "chatFrame") {
+        return;
+    }
+
+    try {
+        _script = document.createElement('script');
+        _script.setAttribute('src', chrome.runtime.getURL('chatExtender.js'));
+        _script.setAttribute('data-extension-id', chrome.runtime.id);
+        (document.head||document.documentElement).appendChild( _script);
+        _script.parentNode.removeChild( _script);
+    } catch (e) {
+        console.log(e);
     }
 
     setTimeout(makeChatShortcuts, 3000);
