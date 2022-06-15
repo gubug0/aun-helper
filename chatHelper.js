@@ -96,7 +96,7 @@ function makeChatShortcuts() {
         keywordText.style = "color: rgb(255, 255, 255);margin-left: 3px;border-radius: 4px;background: rgb(100, 100, 147);";
         keywordText.onclick = function () {
             var keywords = prompt("알림을 받을 키워드를 입력하세요 (여러개는 , 로 구분)", data.chatkeywords);
-            if (keywords !== undefined && keywords !== null && keywords.length > 0) {
+            if (keywords !== undefined && keywords !== null) {
                 chrome.storage.local.set({"chatkeywords": keywords}, function() {
                     makeChatShortcuts();
                 });
