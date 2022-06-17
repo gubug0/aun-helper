@@ -26,6 +26,7 @@ function processNewRefresh() {
 }
 
 function parseLogMessage(log) {
+	const result = []
 	$('small', log).each((index, item) => {
 		if (!item.textContent) {
 			return;
@@ -66,34 +67,11 @@ function parseLogMessage(log) {
                 }
             }
         })
-
-        if (currentLog.filter(item => item.type === '민생지원').length > 0) {
-			processNewRefresh();
-        }
 		
-		const logItems = []
-
-		if (currentLog.filter(item => item.type.match(/^[0-9]+등급$/)).length > 0) {
-			currentLog
-			.filter(item => item.type.match(/^[0-9]+등급$/))
-			.forEach(item => {
-				const city = item.message.replace(/(.*)州에 [0-9,]+골드의 가치를 가진 흑화된 (.*)\(이\)가 출현.*/, "$1");
-				const name = item.message.replace(/(.*)州에 [0-9,]+골드의 가치를 가진 흑화된 (.*)\(이\)가 출현.*/, "$2");
-				logItems.push(`[닼몹] ${city}州 ${item.type} ${name} 출현`);
-			});
-		}
-		if (currentLog.filter(item => item.type.match(/^[0-9]+등급보상$/)).length > 0) {
-			currentLog
-			.filter(item => item.type.match(/^[0-9]+등급보상$/))
-			.forEach(item => {
-				const name = item.message.replace(/누군가 흑화된 (.*) 몬스터를 때려잡은 후 .*/, "$1");
-                logItems.push(`[닼몹] ${name} 사망`);
-			});
-		}
-		if (logItems.length > 0) {
-            addMultiLog(logItems);
-        }
+		currentLog.forEach(item => result.push(item));
 	});
+	
+	return result;
 }
 
 function isDulicatedLogs(total, current, index) {
@@ -108,20 +86,91 @@ function isDulicatedLogs(total, current, index) {
     return iter === current.length || totalIndex == total.length
 }
 
-
-function injectHttpRequestScript() {
-	const _script = document.createElement('script');
-	_script.setAttribute('src', chrome.runtime.getURL('injectLogScript.js'));
-	(document.body||document.documentElement).appendChild( _script);
+function existsRefreshTimeLog(logs) {
+	return logs.filter(item => item.type === '민생지원').length > 0
 }
 
-function requestGameLog() {
-	$.get("/logservice_xs.php", function(data) {
-		sendLogMessage(data);
-		parseLogMessage(data);
+function getDarkMonsterStatus(callback) {
+	chrome.storage.local.get(["darkMonsterStatus"], callback);
+}
+function setDarkMonsterStatus(darkMonsterStatus, callback) {
+	chrome.storage.local.set({"darkMonsterStatus": darkMonsterStatus}, callback);
+}
+
+function processDarkMonsterLog(logs, isRefreshTime) {
+	if (isRefreshTime) {
+		setDarkMonsterStatus({})
+		return;
+	}
+	
+	getDarkMonsterStatus((data) => {
+		const darkMonsterStatus = data.darkMonsterStatus || {};
+		
+		logs
+			.filter(item => item.type.match(/^[0-9]+등급$/))
+			.forEach(item => {
+				
+				const messageMatches = item.message.match(/(.*)州에 [0-9,]+골드의 가치를 가진 흑화된 (.*)\(이\)가 출현.*/)
+				if (!messageMatches) {
+					console.error("unknown darkMonsterMessage", item.message);
+					return;
+				}
+				
+				const typeMatches = item.type.match(/^([0-9]+)등급$/)
+				if (!typeMatches) {
+					return;
+				}
+				
+				const city = messageMatches[1]
+				const monsterName = messageMatches[2]
+				const level = typeMatches[1]
+				
+				darkMonsterStatus[city] = {
+					monsterName: monsterName,
+					level: level
+				}
+			});
+		
+		logs
+			.filter(item => item.type.match(/^[0-9]+등급보상$/))
+			.forEach(item => {
+				const matches = item.message.match(/누군가 흑화된 (.*) 몬스터를 때려잡은 후 .* 골드를 획득!.*/);
+				if (!matches) {
+					console.error("unknown darkMonsterMessage", item.message);
+					return;
+				}
+				
+				const monsterName = matches[1]
+				const citys = Object.keys(darkMonsterStatus)
+									.filter(city => darkMonsterStatus[city].monsterName === monsterName)
+				
+				citys.forEach(city => {
+					delete darkMonsterStatus[city]
+				});
+			});
+			
+		setDarkMonsterStatus(darkMonsterStatus)
 	});
 }
-function sendLogMessage(message) {
+function processUltraRaidLog(logs) {
+	
+}
+function requestGameLog() {
+	$.get("/logservice_xs.php", function(data) {
+		updateLogMessage(data);
+		const newLogs = parseLogMessage(data);
+		
+		const isRefreshTime = existsRefreshTimeLog(newLogs);
+		
+		processDarkMonsterLog(newLogs, isRefreshTime);
+		processUltraRaidLog(newLogs);
+		if (isRefreshTime) {
+			processNewRefresh();
+		}
+	});
+}
+
+function updateLogMessage(message) {
 	document.getElementById("dbstatus").innerHTML = message;
 }
 
@@ -129,6 +178,12 @@ function registerLogRequest() {
 	const worker = create10000msIntervalWorker(function() {
 		requestGameLog();
 	})
+}
+
+function injectHttpRequestScript() {
+	const _script = document.createElement('script');
+	_script.setAttribute('src', chrome.runtime.getURL('injectLogScript.js'));
+	(document.body||document.documentElement).appendChild( _script);
 }
 
 $(document).ready(function() {

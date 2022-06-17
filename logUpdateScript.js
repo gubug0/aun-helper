@@ -1,6 +1,4 @@
-console.log("ttt");
 if (window.location.pathname === "/slog") {
-	
 	chrome.runtime.onMessage.addListener(
 		function(request, sender, sendResponse) {
 			if (request.action === "gameLog") {

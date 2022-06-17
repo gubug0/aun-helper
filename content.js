@@ -13,8 +13,8 @@ function isAutoBattleActive(callback) {
 	});
 }
 
-function getGuildCityData(callback) {
-	chrome.storage.local.get(["guildMap", "lastCity", "guildData", "cityData"], function(data) {
+function getAllCityData(callback) {
+	chrome.storage.local.get(["guildMap", "lastCity", "guildData", "cityData", "darkMonsterStatus"], function(data) {
 		if (data.guildMap === undefined) {
 			data.guildMap = false;
 		}
@@ -26,6 +26,9 @@ function getGuildCityData(callback) {
 		}
 		if (data.cityData === undefined) {
 			data.cityData = "";
+		}
+		if (!data.darkMonsterStatus) {
+			data.darkMonsterStatus = {};
 		}
 
 		if (callback) {

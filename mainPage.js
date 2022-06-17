@@ -71,7 +71,7 @@ function findCurrentCity() {
 }
 
 function updateGuildMap() {
-	getGuildCityData(function (data) {
+	getAllCityData(function (data) {
 		if (!data.guildMap) {
 			return;
 		}
@@ -171,6 +171,22 @@ function updateGuildMap() {
 						mapCityBackground.src = "https://aun.kr/img/default_guild.png";
 					}
 				}
+				const darkMonsterStatus = data.darkMonsterStatus
+				const cityName = mapCityName.replace(/^(.*)州$/, "$1");
+				if (darkMonsterStatus && darkMonsterStatus[cityName]) {
+					const darkMonsterNameDom = document.createElement("div")
+					
+					darkMonsterNameDom.style = "background-color: white;color: red;font-size: 1.2rem;display: inline-block;vertical-align: bottom;text-overflow: ellipsis;white-space: nowrap;overflow: hidden;max-width: 81px;";
+					darkMonsterNameDom.innerHTML = `[${darkMonsterStatus[cityName].level}]${darkMonsterStatus[cityName].monsterName}`;
+					
+					const captionTextDom = mapCityItem.querySelector(".caption-text h6");
+					
+					if (captionTextDom) {
+						captionTextDom.appendChild(darkMonsterNameDom, captionTextDom.firstChild);
+					}
+					
+				}
+				
 			}
 		});
 	})
